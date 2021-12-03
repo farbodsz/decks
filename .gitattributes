@@ -1,0 +1,3 @@
+# Custom filetype for Decks files
+*.decks linguist-detectable
+*.decks linguist-language=Decks
