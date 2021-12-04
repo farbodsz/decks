@@ -1,0 +1,20 @@
+let red = "#fff000"
+
+H1 { startP = [0, 0] }
+
+H2 { colour = red }
+
+Text {
+  Bullet a
+  Bullet b 
+  Bullet c?
+}
+
+let lineX = Line {
+  colour = "#fff000",
+  startP = [10, 5],
+  endP = [20, 5], 
+}
+
+lineX
+lineX { endP = [50, 5] }

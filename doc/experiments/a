@@ -1,0 +1,27 @@
+include shapes.Line
+include shapes.Square
+
+---
+
+red = "#fff000"
+
+# Title { startP = [0, 0] }
+
+## Subtitle { colour = red }
+
+Text {
+  Bullet a
+  Bullet b 
+  Bullet c?
+}
+
+lineX = Line({
+  colour = "#fff000",
+  startP = [10, 5],
+  endP = [20, 5], 
+})
+
+exampleA = lineX { text = "Hey" }
+exampleB = lineX { text = "Lol" }
+
+---

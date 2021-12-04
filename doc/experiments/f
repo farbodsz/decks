@@ -1,0 +1,44 @@
+<style>
+section {
+backgroundColor: red;
+}
+</style>
+
+# Blah { startP = [0, 0] }
+
+## And some more { #identifier .class color=red }
+
+<svg>
+
+</svg>
+
+```decks
+let red = "#fff000"
+
+red
+```
+
+- `Hey` 
+  - This is **meant** to be _something_ cool
+  - And it has multiple bullet points
+  }{
+    colour = red
+  }
+
+  let lineX = Line {
+    id = "mainArrow",
+    colour = "#fff000",
+    startP = [10, 5],
+    endP = [20, 5], 
+  }
+
+  lineX
+  lineX { endP = [50, 5] }
+
+  let point = Circle(`Example` **text** \(this is escaped\)) { startP = [0, 0] }
+
+  Notes(
+    - Talk about blah blah as you're explaining
+  )
+
+}
