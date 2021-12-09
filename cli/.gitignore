@@ -2,3 +2,6 @@
 .stack-work/
 decks.cabal
 *~
+
+# Test file
+test.txt
