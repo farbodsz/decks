@@ -1,0 +1,10 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "decks:lib"
+
+    - path: "./app/Main.hs"
+      component: "decks:exe:decks"
+
+    - path: "./app/Paths_decks.hs"
+      component: "decks:exe:decks"
