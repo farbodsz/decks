@@ -1,0 +1,36 @@
+name: CLI
+
+on:
+  push:
+    paths:
+      - ".github/workflows/cli.yml"
+      - "cli/**"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        resolver:
+          - cli/stack
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Install Haskell Stack
+        run: |
+          which stack || curl -sSL https://get.haskellstack.org/ | sh
+          export PATH=$HOME/.local/bin:$PATH
+
+      - name: Install GHC in CLI directory
+        run: |
+          export PATH=$HOME/.local/bin:$PATH
+          stack --stack-yaml=${{ matrix.resolver }}.yaml --install-ghc setup
+
+      - name: Build
+        run: |
+          export PATH=$HOME/.local/bin:$PATH
+          stack --stack-yaml=${{ matrix.resolver }}.yaml build --fast
+          stack --stack-yaml=${{ matrix.resolver }}.yaml test --fast
