@@ -1,6 +1,9 @@
 module Main where
 
-import           Decks.App                      ( app )
+import           Decks.App
+import           Decks.Parser
 
 main :: IO ()
-main = app
+main = do
+    cmd <- parseCmd
+    parseFile (optFilepath cmd)
