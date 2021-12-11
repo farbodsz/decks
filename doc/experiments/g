@@ -1,0 +1,20 @@
+# My slide
+
+!let test = text[.class color=red] {
+- Hey
+- Test
+}
+
+!let circle = {{
+  <svg class="icon">
+    <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+  </svg>
+}}
+
+!circle
+
+!test
+
+text[]{
+  - Experiment
+}

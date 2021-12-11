@@ -66,3 +66,31 @@ Todo:
 
 Is it better just to go for Markdown syntax, with "imported" (S)CSS and JS files
 to add styling and SVG shape definitions?
+
+## G)
+
+Something closer to Markdown+CSS?
+
+- Want to have multiple of the same thing can be verbose.
+- Need variables
+- Execute variable usage with `!` syntax
+  - `!circle`?
+
+Problem is:
+
+- It feels like the Markdown syntax is a bit misplaced
+- But the idea of (S)CSS is nice
+  - Syntax inspired by Elm/PureScript a bit (how you have attributes then
+    children)
+
+## H)
+
+- Make CSS attributes and content optional
+- Remove Markdown-esque things to keep things consistent
+- Can define raw HTML aliases using `!def` and {{ HTML_CODE }}
+  - This can be extensible
+  - User can include their definitions
+    - Content is defined with `!content`
+
+I think this is good enough for now, and I can tweak the language later if
+needed.
