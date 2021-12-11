@@ -6,7 +6,7 @@ stmt ::= draw_stmt
 cmd_stmt ::= let_stmt
            | include_stmt
 
-let_stmt ::= "!let" identifier "=" draw_stmt
+let_stmt ::= "!let" identifier "=" element_stmt
           |  "!let" identifier "=" "{{" content_template "}}"
 
 include_stmt ::= "!include" "\"" path "\""
@@ -15,10 +15,10 @@ path ::= [A-Za-z/.]+
 
 content_template ::= any "!content" any
 
-draw_stmt ::= identifier "[" attrs "]" "{" content "}"
-           |  identifier "[" attrs "]"
-           |  identifier "{" content "}"
-           |  identifier
+element_stmt ::= identifier "[" attrs "]" "{" content "}"
+              |  identifier "[" attrs "]"
+              |  identifier "{" content "}"
+              |  identifier
 
 attrs ::= css_identifier
        |  css_class

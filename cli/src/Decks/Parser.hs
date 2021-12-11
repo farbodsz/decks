@@ -15,13 +15,14 @@ type DecksProgram = [DecksLetStmt]
 type Identifier = Text
 
 data DecksLetStmt = DecksLetStmt
-    { letIdent    :: Identifier
-    , letDrawStmt :: DecksDrawStmt
+    { letIdent :: Identifier
+    , letElem  :: DecksElement
     }
     deriving Show
 
-data DecksDrawStmt = DecksDrawStmt
-    { drawIdent :: Identifier
+-- | A drawable element statement.
+data DecksElement = DecksElement
+    { elIdent :: Identifier
     }
     deriving Show
 
@@ -44,11 +45,11 @@ pLetStmt = do
     _     <- string "!let"
     ident <- pAroundWs pIdentifier
     _     <- char '='
-    draw  <- pAroundWs pDrawStmt
-    pure $ DecksLetStmt ident draw
+    el    <- pAroundWs pElement
+    pure $ DecksLetStmt ident el
 
-pDrawStmt :: Parser DecksDrawStmt
-pDrawStmt = DecksDrawStmt <$> pIdentifier
+pElement :: Parser DecksElement
+pElement = DecksElement <$> pIdentifier
 
 pIdentifier :: Parser Text
 pIdentifier = T.pack <$> some alphaNumChar
