@@ -1,9 +1,13 @@
+--------------------------------------------------------------------------------
+
 module Decks.App
     ( parseCmd
     , Opts(..)
     ) where
 
 import           Options.Applicative
+
+--------------------------------------------------------------------------------
 
 data Opts = Opts
     { optFilepath :: FilePath
@@ -16,3 +20,5 @@ pOpts :: Parser Opts
 pOpts = Opts <$> argument
     str
     (metavar "FILEPATH" <> help "Path for the Decks file to parse.")
+
+--------------------------------------------------------------------------------

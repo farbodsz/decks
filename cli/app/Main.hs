@@ -6,4 +6,4 @@ import           Decks.Parser
 main :: IO ()
 main = do
     cmd <- parseCmd
-    parseFile (optFilepath cmd)
+    parseDecks (optFilepath cmd)
