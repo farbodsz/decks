@@ -20,9 +20,12 @@ data DecksLetStmt = DecksLetStmt
     }
     deriving Show
 
+type Content = Text
+
 -- | A drawable element statement.
 data DecksElement = DecksElement
-    { elIdent :: Identifier
+    { elIdent   :: Identifier
+    , elContent :: Content
     }
     deriving Show
 
@@ -38,7 +41,7 @@ parseDecks path = do
     print $ runParser pProgram path contents
 
 pProgram :: Parser DecksProgram
-pProgram = many pLetStmt
+pProgram = many pLetStmt <* eof
 
 pLetStmt :: Parser DecksLetStmt
 pLetStmt = do
@@ -49,10 +52,19 @@ pLetStmt = do
     pure $ DecksLetStmt ident el
 
 pElement :: Parser DecksElement
-pElement = DecksElement <$> pIdentifier
+pElement = DecksElement <$> pAroundWs pIdentifier <*> pBraced pContent
 
-pIdentifier :: Parser Text
+-- TODO: Support more characters, and escaped characters (like braces)
+pContent :: Parser Content
+pContent = T.pack <$> some alphaNumChar
+
+pIdentifier :: Parser Identifier
 pIdentifier = T.pack <$> some alphaNumChar
+
+--------------------------------------------------------------------------------
+
+pBraced :: Parser a -> Parser a
+pBraced f = char '{' *> space *> f <* space <* char '}'
 
 pAroundWs :: Parser a -> Parser a
 pAroundWs f = space *> f <* space
