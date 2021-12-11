@@ -1,0 +1,7 @@
+import           Data.Text                      ( Text )
+import           Data.Void                      ( Void )
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
+
+:set -XOverloadedStrings
+:set prompt "λ> "
