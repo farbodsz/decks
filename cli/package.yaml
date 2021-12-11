@@ -35,3 +35,14 @@ executables:
       - -Wall
     dependencies:
       - decks
+
+tests:
+  tests:
+    main: Main.hs
+    source-dirs: test
+    ghc-options:
+      - -Wall
+    dependencies:
+      - decks
+      - hspec >= 2.7 && < 2.8
+      - hspec-megaparsec >= 2.2 && < 2.3

@@ -14,7 +14,7 @@ type DecksProgram = [DecksLetStmt]
 
 -- | Identifies a drawable element.
 newtype Identifier = Identifier Text
-    deriving Show
+    deriving (Eq, Show)
 
 data DecksLetStmt = DecksLetStmt
     { letIdent :: Identifier

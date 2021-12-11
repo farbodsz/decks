@@ -8,3 +8,6 @@ cradle:
 
     - path: "./app/Paths_decks.hs"
       component: "decks:exe:decks"
+
+    - path: "./test"
+      component: "decks:test:tests"
