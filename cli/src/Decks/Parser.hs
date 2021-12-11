@@ -12,7 +12,9 @@ import           Text.Megaparsec.Char
 
 type DecksProgram = [DecksLetStmt]
 
-type Identifier = Text
+-- | Identifies a drawable element.
+newtype Identifier = Identifier Text
+    deriving Show
 
 data DecksLetStmt = DecksLetStmt
     { letIdent :: Identifier
@@ -59,7 +61,7 @@ pContent :: Parser Content
 pContent = T.pack <$> some alphaNumChar
 
 pIdentifier :: Parser Identifier
-pIdentifier = T.pack <$> some alphaNumChar
+pIdentifier = Identifier . T.pack <$> some alphaNumChar
 
 --------------------------------------------------------------------------------
 
