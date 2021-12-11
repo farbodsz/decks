@@ -1,0 +1,31 @@
+program ::= [stmt]
+
+stmt ::= draw_stmt
+      |  cmd_stmt
+
+cmd_stmt ::= let_stmt
+           | include_stmt
+
+let_stmt ::= "!let" identifier "=" draw_stmt
+          |  "!let" identifier "=" "{{" content_template "}}"
+
+include_stmt ::= "!include" "\"" path "\""
+
+path ::= [A-Za-z/.]+
+
+content_template ::= any "!content" any
+
+draw_stmt ::= identifier "[" attrs "]" "{" content "}"
+           |  identifier "[" attrs "]"
+           |  identifier "{" content "}"
+           |  identifier
+
+attrs ::= css_identifier
+       |  css_class
+       |  css_style
+
+css_identifier ::= "#" [A-Za-z\-_]+
+css_class      ::= "." [A-Za-z\-_]+
+css_style      ::= [A-Za-z\-_]+ "=" any
+
+any ::= [A-Za-z\-_0-9%.]+
