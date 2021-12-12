@@ -61,7 +61,10 @@ pContent :: Parser Content
 pContent = T.pack <$> some alphaNumChar
 
 pIdentifier :: Parser Identifier
-pIdentifier = Identifier . T.pack <$> some alphaNumChar
+pIdentifier = Identifier . T.pack <$> identChars
+  where
+    identChars =
+        (:) <$> letterChar <*> many (alphaNumChar <|> char '_' <|> char '-')
 
 --------------------------------------------------------------------------------
 
