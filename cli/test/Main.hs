@@ -40,6 +40,20 @@ main = hspec $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] Nothing
 
+    describe "pDrawStmt" $ do
+        it "ignores extra whitespaces" $ do
+            parse pDrawStmt "" "bar [ .my-class]{ content }"
+                `shouldParse` DecksDrawStmt
+                                  { drawElem = DecksElement
+                                                   { elIdent = Identifier "bar"
+                                                   , elAttrs = [ CssClass
+                                                                     "my-class"
+                                                               ]
+                                                   , elContent = Just "content"
+                                                   }
+                                  }
+
+
     describe "pLetStmt" $ do
         it "ignores extra whitespaces" $ do
             parse pLetStmt "" "!let foo  =bar [ .my-class  ]    { content }"
@@ -53,5 +67,23 @@ main = hspec $ do
                                                    , elContent = Just "content"
                                                    }
                                   }
+
+    describe "pStmt" $ do
+        it "can recognise draw stmts" $ do
+            parse pStmt "" "bar { overridden content }"
+                `shouldParse` DecksDrawStmt
+                                  { drawElem = DecksElement
+                                                   (Identifier "bar")
+                                                   []
+                                                   (Just "overridden content")
+                                  }
+
+        it "can recognise let stmts" $ do
+            parse pStmt "" "!let foo=bar [.my-class]" `shouldParse` DecksLetStmt
+                (Identifier "foo")
+                DecksElement { elIdent   = Identifier "bar"
+                             , elAttrs   = [CssClass "my-class"]
+                             , elContent = Nothing
+                             }
 
 --------------------------------------------------------------------------------

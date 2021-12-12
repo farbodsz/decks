@@ -11,16 +11,20 @@ import           Text.Megaparsec.Char
 
 --------------------------------------------------------------------------------
 
-type DecksProgram = [DecksLetStmt]
+type DecksProgram = [DecksStmt]
 
 -- | Identifies a drawable element.
 newtype Identifier = Identifier Text
     deriving (Eq, Show)
 
-data DecksLetStmt = DecksLetStmt
-    { letIdent :: Identifier
-    , letElem  :: DecksElement
-    }
+data DecksStmt
+    = DecksDrawStmt
+        { drawElem :: DecksElement
+        }
+    | DecksLetStmt
+        { letIdent :: Identifier
+        , letElem  :: DecksElement
+        }
     deriving (Eq, Show)
 
 -- | A drawable element statement.
@@ -55,7 +59,13 @@ parseDecks path = do
 pProgram :: Parser DecksProgram
 pProgram = many pLetStmt <* eof
 
-pLetStmt :: Parser DecksLetStmt
+pStmt :: Parser DecksStmt
+pStmt = pDrawStmt <|> pLetStmt
+
+pDrawStmt :: Parser DecksStmt
+pDrawStmt = DecksDrawStmt <$> pElement
+
+pLetStmt :: Parser DecksStmt
 pLetStmt =
     DecksLetStmt
         <$> (string "!let" *> space1 *> pIdentifier)
