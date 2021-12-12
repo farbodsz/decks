@@ -46,15 +46,13 @@ pProgram :: Parser DecksProgram
 pProgram = many pLetStmt <* eof
 
 pLetStmt :: Parser DecksLetStmt
-pLetStmt = do
-    _     <- string "!let"
-    ident <- pAroundWs pIdentifier
-    _     <- char '='
-    el    <- pAroundWs pElement
-    pure $ DecksLetStmt ident el
+pLetStmt =
+    DecksLetStmt
+        <$> (string "!let" *> space1 *> pIdentifier)
+        <*> (space *> char '=' *> space *> pElement)
 
 pElement :: Parser DecksElement
-pElement = DecksElement <$> pAroundWs pIdentifier <*> pBraced pContent
+pElement = DecksElement <$> pIdentifier <*> (space *> pBraced pContent)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
