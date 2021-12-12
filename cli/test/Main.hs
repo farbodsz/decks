@@ -40,6 +40,14 @@ main = hspec $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] Nothing
 
+    describe "pContent" $ do
+        it "can contain spaces, dashes, underscores" $ do
+            let str = "Foo bar_bar - foo"
+            parse pContent "" str `shouldParse` str
+        it "trimmed spaces (no leading or trailing spaces)" $ do
+            let str = "  foo bar  "
+            parse pContent "" str `shouldParse` "foo bar"
+
     describe "pDrawStmt" $ do
         it "ignores extra whitespaces" $ do
             parse pDrawStmt "" "bar [ .my-class]{ content }"

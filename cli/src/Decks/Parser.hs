@@ -86,7 +86,8 @@ pCssClass = char '.' *> (CssClass <$> identChars)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
-pContent = T.pack <$> some alphaNumChar
+pContent = T.strip . T.pack <$> some allowedChars
+    where allowedChars = choice [alphaNumChar, spaceChar, char '_', char '-']
 
 pIdentifier :: Parser Identifier
 pIdentifier = Identifier <$> identChars
