@@ -26,20 +26,19 @@ main = hspec $ do
     describe "pElement" $ do
         it "can parse simple element" $ do
             parse pElement "" "foo [.my-class] { bar }"
-                `shouldParse` DecksElement
-                                  { elIdent   = Identifier "foo"
-                                  , elAttrs   = Just [CssClass "my-class"]
-                                  , elContent = Just "bar"
-                                  }
+                `shouldParse` DecksElement { elIdent   = Identifier "foo"
+                                           , elAttrs   = [CssClass "my-class"]
+                                           , elContent = Just "bar"
+                                           }
         it "has optional attrs" $ do
             parse pElement "" "foo { bar }" `shouldParse` DecksElement
                 { elIdent   = Identifier "foo"
-                , elAttrs   = Nothing
+                , elAttrs   = []
                 , elContent = Just "bar"
                 }
         it "has optional attrs and content" $ do
             parse pElement "" "foo"
-                `shouldParse` DecksElement (Identifier "foo") Nothing Nothing
+                `shouldParse` DecksElement (Identifier "foo") [] Nothing
 
     describe "pLetStmt" $ do
         it "ignores extra whitespaces" $ do
@@ -47,10 +46,12 @@ main = hspec $ do
                 `shouldParse` DecksLetStmt
                                   { letIdent = Identifier "foo"
                                   , letElem  = DecksElement
-                                      { elIdent   = Identifier "bar"
-                                      , elAttrs   = Just [CssClass "my-class"]
-                                      , elContent = Just "content"
-                                      }
+                                                   { elIdent = Identifier "bar"
+                                                   , elAttrs = [ CssClass
+                                                                     "my-class"
+                                                               ]
+                                                   , elContent = Just "content"
+                                                   }
                                   }
 
 --------------------------------------------------------------------------------

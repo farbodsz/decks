@@ -2,6 +2,7 @@
 
 module Decks.Parser where
 
+import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import           Data.Void                      ( Void )
@@ -25,7 +26,7 @@ data DecksLetStmt = DecksLetStmt
 -- | A drawable element statement.
 data DecksElement = DecksElement
     { elIdent   :: Identifier
-    , elAttrs   :: Maybe [DecksAttr]
+    , elAttrs   :: [DecksAttr]
     , elContent :: Maybe Content
     }
     deriving (Eq, Show)
@@ -64,7 +65,7 @@ pElement :: Parser DecksElement
 pElement =
     DecksElement
         <$> (pIdentifier <* space)
-        <*> optional (pBracketed (some pAttr) <* space)
+        <*> (fromMaybe [] <$> optional (pBracketed (some pAttr) <* space))
         <*> optional (pBraced pContent)
 
 pAttr :: Parser DecksAttr
