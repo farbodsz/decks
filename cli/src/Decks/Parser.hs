@@ -35,13 +35,15 @@ data DecksElement = DecksElement
     }
     deriving (Eq, Show)
 
--- | Elements can have CSS selectors attached to them.
---
--- TODO: CssStyle       -- ^ E.g. @key="val"@
---
+-- | Elements can have attributes attached to them, referring to external CSS
+-- code.
 data DecksAttr
-    = CssId Text        -- ^ E.g. @#identifier@
-    | CssClass Text     -- ^ E.g. @.class-name@
+    = CssId Text              -- ^ E.g. @#identifier@
+    | CssClass Text           -- ^ E.g. @.class-name@
+    | CssProp                 -- ^ E.g. @key="val"@
+        { cssPropKey :: Text
+        , cssPropVal :: Text
+        }
     deriving (Eq, Show)
 
 type Content = Text
@@ -82,10 +84,12 @@ pElement =
         <*> optional (braced pContent)
 
 pAttr :: Parser DecksAttr
-pAttr = pCssId <|> pCssClass
+pAttr = choice [pCssId, pCssClass, pCssProp]
   where
     pCssId    = CssId <$> (char '#' *> identChars)
     pCssClass = CssClass <$> (char '.' *> identChars)
+    pCssProp  = CssProp <$> (identChars <* char '=') <*> optQuoted valueChars
+        where valueChars = fmap T.pack . some . noneOf $ ['{', '}', '"']
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
@@ -110,5 +114,9 @@ braced f = char '{' *> space *> f <* space <* char '}'
 -- Surrounded by square brackets and space(s).
 bracketed :: Parser a -> Parser a
 bracketed f = char '[' *> space *> f <* space <* char ']'
+
+-- Optionally surrounded by double-quotation marks.
+optQuoted :: Parser a -> Parser a
+optQuoted f = (quoteChar *> f <* quoteChar) <|> f where quoteChar = char '"'
 
 --------------------------------------------------------------------------------

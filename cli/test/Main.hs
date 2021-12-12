@@ -45,6 +45,10 @@ main = hspec $ do
             parse pAttr "" "#my-class" `shouldParse` CssId "my-class"
         it "can recognise class selectors" $ do
             parse pAttr "" ".my-class" `shouldParse` CssClass "my-class"
+        it "can recognise key-value properties" $ do
+            parse pAttr "" "height=25px" `shouldParse` CssProp "height" "25px"
+        it "can recognise key-value properties in quotes" $ do
+            parse pAttr "" "color=\"#FF0\"" `shouldParse` CssProp "color" "#FF0"
 
     describe "pContent" $ do
         it "can contain spaces, dashes, underscores" $ do
