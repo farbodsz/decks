@@ -19,7 +19,7 @@ main = hspec $ do
             parse pIdentifier "" "foo_bar-Foo"
                 `shouldParse` Identifier "foo_bar-Foo"
         it "should not contain braces" $ do
-            parse pIdentifier "" `shouldFailOn` "fo{o}Bar"
+            parse pIdentifier "" "fo{o}Bar" `shouldParse` Identifier "fo"
         it "should not start with a number" $ do
             parse pIdentifier "" `shouldFailOn` "4ooBar"
 
