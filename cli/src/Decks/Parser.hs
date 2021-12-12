@@ -37,10 +37,11 @@ data DecksElement = DecksElement
 
 -- | Elements can have CSS selectors attached to them.
 --
--- TODO: CssIdentifier  -- ^ E.g. @#identifier@
 -- TODO: CssStyle       -- ^ E.g. @key="val"@
-
-data DecksAttr = CssClass Text -- ^ E.g. @.class-name@
+--
+data DecksAttr
+    = CssId Text        -- ^ E.g. @#identifier@
+    | CssClass Text     -- ^ E.g. @.class-name@
     deriving (Eq, Show)
 
 type Content = Text
@@ -81,10 +82,10 @@ pElement =
         <*> optional (braced pContent)
 
 pAttr :: Parser DecksAttr
-pAttr = pCssClass
-
-pCssClass :: Parser DecksAttr
-pCssClass = char '.' *> (CssClass <$> identChars)
+pAttr = pCssId <|> pCssClass
+  where
+    pCssId    = CssId <$> (char '#' *> identChars)
+    pCssClass = CssClass <$> (char '.' *> identChars)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content

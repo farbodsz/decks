@@ -40,6 +40,12 @@ main = hspec $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] Nothing
 
+    describe "pAttr" $ do
+        it "can recognise id selectors" $ do
+            parse pAttr "" "#my-class" `shouldParse` CssId "my-class"
+        it "can recognise class selectors" $ do
+            parse pAttr "" ".my-class" `shouldParse` CssClass "my-class"
+
     describe "pContent" $ do
         it "can contain spaces, dashes, underscores" $ do
             let str = "Foo bar_bar - foo"
