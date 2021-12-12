@@ -54,7 +54,9 @@ type Parser = Parsec Void Text
 parseDecks :: FilePath -> IO ()
 parseDecks path = do
     contents <- T.pack <$> readFile path
-    print $ runParser pProgram path contents
+    putStrLn $ case runParser pProgram path contents of
+        Left  bundle -> errorBundlePretty bundle
+        Right ast    -> show ast
 
 pProgram :: Parser DecksProgram
 pProgram = many (pStmt <* many newline) <* eof
@@ -105,8 +107,5 @@ pBraced f = char '{' *> space *> f <* space <* char '}'
 
 pBracketed :: Parser a -> Parser a
 pBracketed f = char '[' *> space *> f <* space <* char ']'
-
-pAroundWs :: Parser a -> Parser a
-pAroundWs f = space *> f <* space
 
 --------------------------------------------------------------------------------
