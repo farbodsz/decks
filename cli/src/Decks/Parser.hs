@@ -13,7 +13,7 @@ import           Text.Megaparsec.Char
 type DecksProgram = [DecksLetStmt]
 
 -- | Identifies a drawable element.
-newtype Identifier = Identifier Text
+newtype Identifier = Identifier { unIdentifier :: Text }
     deriving (Eq, Show)
 
 data DecksLetStmt = DecksLetStmt
@@ -22,14 +22,14 @@ data DecksLetStmt = DecksLetStmt
     }
     deriving (Eq, Show)
 
-type Content = Text
-
 -- | A drawable element statement.
 data DecksElement = DecksElement
     { elIdent   :: Identifier
-    , elContent :: Content
+    , elContent :: Maybe Content
     }
     deriving (Eq, Show)
+
+type Content = Text
 
 --------------------------------------------------------------------------------
 
@@ -52,7 +52,8 @@ pLetStmt =
         <*> (space *> char '=' *> space *> pElement)
 
 pElement :: Parser DecksElement
-pElement = DecksElement <$> pIdentifier <*> (space *> pBraced pContent)
+pElement =
+    DecksElement <$> pIdentifier <*> optional (space *> pBraced pContent)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content

@@ -26,7 +26,11 @@ main = hspec $ do
     describe "pElement" $ do
         it "can parse simple element" $ do
             parse pElement "" "foo { bar }"
-                `shouldParse` DecksElement (Identifier "foo") "bar"
+                `shouldParse` DecksElement (Identifier "foo") (Just "bar")
+        it "has optional content" $ do
+            parse pElement "" "foo"
+                `shouldParse` DecksElement (Identifier "foo") Nothing
+
 
     describe "pLetStmt" $ do
         it "ignores extra whitespaces" $ do
@@ -35,7 +39,7 @@ main = hspec $ do
                                   { letIdent = Identifier "foo"
                                   , letElem  = DecksElement
                                                    (Identifier "bar")
-                                                   "content"
+                                                   (Just "content")
                                   }
 
 --------------------------------------------------------------------------------
