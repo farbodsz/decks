@@ -20,7 +20,7 @@ data DecksLetStmt = DecksLetStmt
     { letIdent :: Identifier
     , letElem  :: DecksElement
     }
-    deriving Show
+    deriving (Eq, Show)
 
 type Content = Text
 
@@ -29,7 +29,7 @@ data DecksElement = DecksElement
     { elIdent   :: Identifier
     , elContent :: Content
     }
-    deriving Show
+    deriving (Eq, Show)
 
 --------------------------------------------------------------------------------
 

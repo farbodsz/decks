@@ -23,4 +23,19 @@ main = hspec $ do
         it "should not start with a number" $ do
             parse pIdentifier "" `shouldFailOn` "4ooBar"
 
+    describe "pElement" $ do
+        it "can parse simple element" $ do
+            parse pElement "" "foo { bar }"
+                `shouldParse` DecksElement (Identifier "foo") "bar"
+
+    describe "pLetStmt" $ do
+        it "ignores extra whitespaces" $ do
+            parse pLetStmt "" "!let foo  =bar { content }"
+                `shouldParse` DecksLetStmt
+                                  { letIdent = Identifier "foo"
+                                  , letElem  = DecksElement
+                                                   (Identifier "bar")
+                                                   "content"
+                                  }
+
 --------------------------------------------------------------------------------
