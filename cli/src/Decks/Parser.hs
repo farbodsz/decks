@@ -57,7 +57,7 @@ parseDecks path = do
     print $ runParser pProgram path contents
 
 pProgram :: Parser DecksProgram
-pProgram = many pLetStmt <* eof
+pProgram = many (pStmt <* many newline) <* eof
 
 pStmt :: Parser DecksStmt
 pStmt = pDrawStmt <|> pLetStmt
