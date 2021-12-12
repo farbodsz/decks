@@ -44,6 +44,12 @@ main = hspec $ do
         it "can contain spaces, dashes, underscores" $ do
             let str = "Foo bar_bar - foo"
             parse pContent "" str `shouldParse` str
+        it "can contain punctuation" $ do
+            let str = "It's good? (yes - it is!)"
+            parse pContent "" str `shouldParse` str
+        it "can contain numeric equations" $ do
+            let str = "2 + 2 = 5"
+            parse pContent "" str `shouldParse` str
         it "trimmed spaces (no leading or trailing spaces)" $ do
             let str = "  foo bar  "
             parse pContent "" str `shouldParse` "foo bar"

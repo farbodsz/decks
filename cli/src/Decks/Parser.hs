@@ -77,8 +77,8 @@ pElement :: Parser DecksElement
 pElement =
     DecksElement
         <$> (pIdentifier <* space)
-        <*> (fromMaybe [] <$> optional (pBracketed (some pAttr) <* space))
-        <*> optional (pBraced pContent)
+        <*> (fromMaybe [] <$> optional (bracketed (some pAttr) <* space))
+        <*> optional (braced pContent)
 
 pAttr :: Parser DecksAttr
 pAttr = pCssClass
@@ -89,7 +89,7 @@ pCssClass = char '.' *> (CssClass <$> identChars)
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
 pContent = T.strip . T.pack <$> some allowedChars
-    where allowedChars = choice [alphaNumChar, spaceChar, char '_', char '-']
+    where allowedChars = noneOf ['{', '}']
 
 pIdentifier :: Parser Identifier
 pIdentifier = Identifier <$> identChars
@@ -102,10 +102,12 @@ identChars = T.pack <$> ((:) <$> letterChar <*> many alphaNumDashChar)
 
 --------------------------------------------------------------------------------
 
-pBraced :: Parser a -> Parser a
-pBraced f = char '{' *> space *> f <* space <* char '}'
+-- Surrounded by braces and space(s).
+braced :: Parser a -> Parser a
+braced f = char '{' *> space *> f <* space <* char '}'
 
-pBracketed :: Parser a -> Parser a
-pBracketed f = char '[' *> space *> f <* space <* char ']'
+-- Surrounded by square brackets and space(s).
+bracketed :: Parser a -> Parser a
+bracketed f = char '[' *> space *> f <* space <* char ']'
 
 --------------------------------------------------------------------------------
