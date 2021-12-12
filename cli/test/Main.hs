@@ -25,21 +25,32 @@ main = hspec $ do
 
     describe "pElement" $ do
         it "can parse simple element" $ do
-            parse pElement "" "foo { bar }"
-                `shouldParse` DecksElement (Identifier "foo") (Just "bar")
-        it "has optional content" $ do
+            parse pElement "" "foo [.my-class] { bar }"
+                `shouldParse` DecksElement
+                                  { elIdent   = Identifier "foo"
+                                  , elAttrs   = Just [CssClass "my-class"]
+                                  , elContent = Just "bar"
+                                  }
+        it "has optional attrs" $ do
+            parse pElement "" "foo { bar }" `shouldParse` DecksElement
+                { elIdent   = Identifier "foo"
+                , elAttrs   = Nothing
+                , elContent = Just "bar"
+                }
+        it "has optional attrs and content" $ do
             parse pElement "" "foo"
-                `shouldParse` DecksElement (Identifier "foo") Nothing
-
+                `shouldParse` DecksElement (Identifier "foo") Nothing Nothing
 
     describe "pLetStmt" $ do
         it "ignores extra whitespaces" $ do
-            parse pLetStmt "" "!let foo  =bar { content }"
+            parse pLetStmt "" "!let foo  =bar [ .my-class  ]    { content }"
                 `shouldParse` DecksLetStmt
                                   { letIdent = Identifier "foo"
                                   , letElem  = DecksElement
-                                                   (Identifier "bar")
-                                                   (Just "content")
+                                      { elIdent   = Identifier "bar"
+                                      , elAttrs   = Just [CssClass "my-class"]
+                                      , elContent = Just "content"
+                                      }
                                   }
 
 --------------------------------------------------------------------------------

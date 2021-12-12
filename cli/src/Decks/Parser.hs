@@ -13,7 +13,7 @@ import           Text.Megaparsec.Char
 type DecksProgram = [DecksLetStmt]
 
 -- | Identifies a drawable element.
-newtype Identifier = Identifier { unIdentifier :: Text }
+newtype Identifier = Identifier Text
     deriving (Eq, Show)
 
 data DecksLetStmt = DecksLetStmt
@@ -25,8 +25,17 @@ data DecksLetStmt = DecksLetStmt
 -- | A drawable element statement.
 data DecksElement = DecksElement
     { elIdent   :: Identifier
+    , elAttrs   :: Maybe [DecksAttr]
     , elContent :: Maybe Content
     }
+    deriving (Eq, Show)
+
+-- | Elements can have CSS selectors attached to them.
+--
+-- TODO: CssIdentifier  -- ^ E.g. @#identifier@
+-- TODO: CssStyle       -- ^ E.g. @key="val"@
+
+data DecksAttr = CssClass Text -- ^ E.g. @.class-name@
     deriving (Eq, Show)
 
 type Content = Text
@@ -53,22 +62,37 @@ pLetStmt =
 
 pElement :: Parser DecksElement
 pElement =
-    DecksElement <$> pIdentifier <*> optional (space *> pBraced pContent)
+    DecksElement
+        <$> (pIdentifier <* space)
+        <*> optional (pBracketed (some pAttr) <* space)
+        <*> optional (pBraced pContent)
+
+pAttr :: Parser DecksAttr
+pAttr = pCssClass
+
+pCssClass :: Parser DecksAttr
+pCssClass = char '.' *> (CssClass <$> identChars)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
 pContent = T.pack <$> some alphaNumChar
 
 pIdentifier :: Parser Identifier
-pIdentifier = Identifier . T.pack <$> identChars
-  where
-    identChars =
-        (:) <$> letterChar <*> many (alphaNumChar <|> char '_' <|> char '-')
+pIdentifier = Identifier <$> identChars
+
+-- | Text for an identifier starting with a letter and containing only
+-- alphanumeric characters, dashes and underscores.
+identChars :: Parser Text
+identChars = T.pack <$> ((:) <$> letterChar <*> many alphaNumDashChar)
+    where alphaNumDashChar = alphaNumChar <|> char '_' <|> char '-'
 
 --------------------------------------------------------------------------------
 
 pBraced :: Parser a -> Parser a
 pBraced f = char '{' *> space *> f <* space <* char '}'
+
+pBracketed :: Parser a -> Parser a
+pBracketed f = char '[' *> space *> f <* space <* char ']'
 
 pAroundWs :: Parser a -> Parser a
 pAroundWs f = space *> f <* space
