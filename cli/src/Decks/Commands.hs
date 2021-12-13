@@ -10,7 +10,7 @@ import           Options.Applicative
 
 data Opts = Opts
     { optFilepath :: FilePath
-    -- , optWatch    :: Bool
+    , optWatch    :: Bool
     }
 
 parseCmd :: IO Opts
@@ -21,11 +21,14 @@ pOpts =
     Opts
         <$> (argument
                 str
-                (metavar "FILEPATH" <> help "Path for the Decks file to parse.")
+                (  metavar "PATH"
+                <> help "Directory path containing a Decks file to parse."
+                )
             )
-        -- <*> switch
-        --         (long "watch" <> short 'w' <> help
-        --             "Watches file and updates on changes."
-        --         )
+        <*> (not <$> switch
+                (long "no-watch" <> short 'n' <> help
+                    "Only run Decks once, not updating on subsequent changes"
+                )
+            )
 
 --------------------------------------------------------------------------------
