@@ -1,32 +1,44 @@
 --------------------------------------------------------------------------------
 
-module Decks.App
-    ( parseCmd
-    , Opts(..)
-    ) where
+-- | The app simply reads the parsed CLI commands and runs computuations based
+-- on them.
+--
+module Decks.App where
 
-import           Options.Applicative
+import           Decks.Commands
+import           Decks.Logging
+import           Decks.Parser                   ( parseDecks )
+
+import           Control.Concurrent             ( threadDelay )
+import           Control.Monad                  ( forever )
+import           Data.Time.Clock                ( getCurrentTime )
+import           System.FSNotify
+import           System.FilePath                ( takeExtension )
 
 --------------------------------------------------------------------------------
 
-data Opts = Opts
-    { optFilepath :: FilePath
-    -- , optWatch    :: Bool
-    }
+main :: IO ()
+main = do
+    Opts {..} <- parseCmd
+    watch optFilepath
 
-parseCmd :: IO Opts
-parseCmd = execParser $ info (pOpts <**> helper) (fullDesc <> header "Decks")
+watch :: FilePath -> IO ()
+watch path = withManager $ \mgr -> do
+    time <- getCurrentTime
+    logInfo time $ "Watching directory " ++ path
 
-pOpts :: Parser Opts
-pOpts =
-    Opts
-        <$> (argument
-                str
-                (metavar "FILEPATH" <> help "Path for the Decks file to parse.")
-            )
-        -- <*> switch
-        --         (long "watch" <> short 'w' <> help
-        --             "Watches file and updates on changes."
-        --         )
+    -- Start a watching job (in the background)
+    _ <- watchDir mgr path shouldCheckFile (processEvent path)
+
+    -- Sleep forever (until interrupted)
+    forever $ threadDelay 1000000
+
+shouldCheckFile :: Event -> Bool
+shouldCheckFile (Modified file _ _) = takeExtension file == ".decks"
+shouldCheckFile _                   = False
+
+processEvent :: FilePath -> Event -> IO ()
+processEvent _ ev@(Modified file _ _) = logEvent ev >>= pure (parseDecks file)
+processEvent _ _                      = pure ()
 
 --------------------------------------------------------------------------------
