@@ -39,6 +39,15 @@ main = hspec $ do
         it "has optional attrs and content" $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] Nothing
+        it "can parse multiple attributes" $ do
+            parse pElement "" "foo [ .class #id x=0 y-prop=\"test\" ]"
+                `shouldParse` DecksElement
+                                  (Identifier "foo")
+                                  [ CssClass "class"
+                                  , CssId "id"
+                                  , CssProp "x" "0"
+                                  ]
+                                  Nothing
 
     describe "pAttr" $ do
         it "can recognise id selectors" $ do
