@@ -13,9 +13,9 @@ dependencies:
   - base >= 4.7 && < 5
   - filepath
   - fsnotify
-  - optparse-applicative >= 0.16 && < 0.17
-  - megaparsec >= 9.0 && < 9.1
-  - text >= 1.2 && < 1.3
+  - optparse-applicative
+  - megaparsec
+  - text
   - time
 
 default-extensions:
@@ -47,5 +47,5 @@ tests:
       - -Wall
     dependencies:
       - decks
-      - hspec >= 2.7 && < 2.8
-      - hspec-megaparsec >= 2.2 && < 2.3
+      - hspec
+      - hspec-megaparsec
