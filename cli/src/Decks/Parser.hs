@@ -1,5 +1,7 @@
 --------------------------------------------------------------------------------
 
+{-# LANGUAGE TypeApplications #-}
+
 -- | Produces a parse tree from the input file.
 --
 module Decks.Parser where
@@ -17,6 +19,7 @@ import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
 
+import           Data.Char                      ( isSpace )
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 
@@ -64,8 +67,13 @@ pElement :: Parser DecksElement
 pElement =
     DecksElement
         <$> (pIdentifier <* space)
-        <*> (fromMaybe [] <$> optional (bracketed (some pAttr) <* space))
+        <*> (fromMaybe [] <$> optional attrSection <* space)
         <*> optional (braced pContent)
+  where
+    attrSection = char '[' *> space *> attrList <* space <* char ']' <* space
+    -- Space following an attribute needs lookahead and backtracking with 'try'
+    -- since FOLLOW could be either ']' or another attribute.
+    attrList    = liftM2 (:) pAttr (many $ try (space1 *> pAttr))
 
 pAttr :: Parser DecksAttr
 pAttr = choice [pCssId, pCssClass, pCssProp]
@@ -73,7 +81,9 @@ pAttr = choice [pCssId, pCssClass, pCssProp]
     pCssId    = CssId <$> (char '#' *> identChars)
     pCssClass = CssClass <$> (char '.' *> identChars)
     pCssProp  = CssProp <$> (identChars <* char '=') <*> optQuoted valueChars
-        where valueChars = fmap T.pack . some . noneOf $ ['{', '}', '"']
+      where
+        valueChars = fmap T.pack . some $ satisfy tokPred
+        tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
@@ -121,6 +131,6 @@ bracketed f = char '[' *> space *> f <* space <* char ']'
 
 -- | Optionally surrounded by double-quotation marks.
 optQuoted :: Parser a -> Parser a
-optQuoted f = (quoteChar *> f <* quoteChar) <|> f where quoteChar = char '"'
+optQuoted f = f <|> (quoteChar *> f <* quoteChar) where quoteChar = char '"'
 
 --------------------------------------------------------------------------------
