@@ -1,6 +1,10 @@
 --------------------------------------------------------------------------------
 
+-- | Produces a parse tree from the input file.
+--
 module Decks.Parser where
+
+import           Decks.Utils
 
 import           Control.Monad
 
@@ -14,6 +18,7 @@ import           Text.Megaparsec.Char
 
 --------------------------------------------------------------------------------
 
+-- | The Parse Syntax Tree for the Decks program.
 type DecksProgram = [DecksStmt]
 
 -- | Identifies a drawable element.
@@ -141,24 +146,16 @@ identChars = T.pack <$> ((:) <$> letterChar <*> many alphaNumDashChar)
 
 --------------------------------------------------------------------------------
 
--- Surrounded by braces and space(s).
+-- | Surrounded by braces and space(s).
 braced :: Parser a -> Parser a
 braced f = char '{' *> space *> f <* space <* char '}'
 
--- Surrounded by square brackets and space(s).
+-- | Surrounded by square brackets and space(s).
 bracketed :: Parser a -> Parser a
 bracketed f = char '[' *> space *> f <* space <* char ']'
 
--- Optionally surrounded by double-quotation marks.
+-- | Optionally surrounded by double-quotation marks.
 optQuoted :: Parser a -> Parser a
 optQuoted f = (quoteChar *> f <* quoteChar) <|> f where quoteChar = char '"'
-
---------------------------------------------------------------------------------
-
-list3 :: a -> a -> a -> [a]
-list3 x1 x2 x3 = [x1, x2, x3]
-
-list5 :: a -> a -> a -> a -> a -> [a]
-list5 x1 x2 x3 x4 x5 = [x1, x2, x3, x4, x5]
 
 --------------------------------------------------------------------------------
