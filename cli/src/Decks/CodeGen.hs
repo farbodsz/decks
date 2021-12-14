@@ -4,6 +4,7 @@
 --
 module Decks.CodeGen where
 
+import           Decks.Error
 import           Decks.Grammar
 import           Decks.Logging
 
@@ -14,25 +15,6 @@ import qualified Data.HashMap.Lazy             as M
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
-
-
---------------------------------------------------------------------------------
--- Error types and utility functions
---------------------------------------------------------------------------------
-
-data CodeGenError
-    = UndefinedIdentifier Identifier
-    | EmptyContent
-    | MultipleCssIds
-    | InternalError Text
-    deriving Eq
-
-showCodeGenErr :: CodeGenError -> Text
-showCodeGenErr (UndefinedIdentifier i) =
-    T.concat ["Undefined identifier '", unIdentifier i, "'"]
-showCodeGenErr EmptyContent        = "Element content cannot be empty"
-showCodeGenErr MultipleCssIds      = "HTML ID attributes must be unique"
-showCodeGenErr (InternalError msg) = "Internal error: " <> msg
 
 
 --------------------------------------------------------------------------------
