@@ -4,6 +4,7 @@
 --
 module Decks.Grammar where
 
+import           Data.Hashable                  ( Hashable )
 import           Data.Text                      ( Text )
 
 --------------------------------------------------------------------------------
@@ -12,8 +13,8 @@ import           Data.Text                      ( Text )
 newtype DecksProgram = DecksProgram [DecksStmt]
 
 -- | Identifies a drawable element.
-newtype Identifier = Identifier Text
-    deriving (Eq, Show)
+newtype Identifier = Identifier { unIdentifier :: Text }
+    deriving (Eq, Hashable, Show)
 
 data DecksStmt
     = DecksDrawStmt
@@ -29,7 +30,7 @@ data DecksStmt
         }
     deriving (Eq, Show)
 
-newtype ContentTemplate = ContentTemplate Text
+newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }
     deriving (Eq, Show)
 
 -- | A drawable element statement.

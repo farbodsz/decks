@@ -5,6 +5,7 @@
 --
 module Decks.App where
 
+import           Decks.CodeGen                  ( runCodeGen )
 import           Decks.Commands
 import           Decks.Logging
 import           Decks.Parser                   ( parseDecks )
@@ -29,7 +30,7 @@ main = do
 -- updating as they are modified, if @shouldWatch@ is True. Otherwise, the
 -- file(s) are only read once.
 watch :: FilePath -> Bool -> IO ()
-watch path False = getDecksFromDir path >>= mapM_ parseDecks
+watch path False = getDecksFromDir path >>= mapM_ processFile
 watch path True  = withManager $ \mgr -> do
     logMsg LogInfo $ "Watching directory " <> T.pack path
 
@@ -51,7 +52,12 @@ isDecksFile :: FilePath -> Bool
 isDecksFile fp = takeExtension fp == ".decks"
 
 processEvent :: FilePath -> Event -> IO ()
-processEvent _ ev@(Modified file _ _) = logEvent ev >>= pure (parseDecks file)
+processEvent _ ev@(Modified file _ _) = logEvent ev >> processFile file
 processEvent _ _                      = pure ()
+
+processFile :: FilePath -> IO ()
+processFile file = parseDecks file >>= \case
+    Nothing  -> pure ()
+    Just ast -> runCodeGen ast
 
 --------------------------------------------------------------------------------

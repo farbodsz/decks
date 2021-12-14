@@ -26,15 +26,18 @@ type Parser = Parsec Void Text
 
 --------------------------------------------------------------------------------
 
-parseDecks :: FilePath -> IO ()
+parseDecks :: FilePath -> IO (Maybe DecksProgram)
 parseDecks path = do
     contents <- T.pack <$> readFile path
     case runParser pProgram path contents of
-        Left bundle -> logMsg LogError "Unable to parse file"
-            >> putStrLn (errorBundlePretty bundle)
-        Right ast ->
+        Left bundle -> do
+            logMsg LogError "Unable to parse file"
+            putStrLn (errorBundlePretty bundle)
+            pure Nothing
+        Right ast -> do
             logMsg LogSuccess "Parsed successfully"
-                >> (TIO.putStr . T.intercalate "\n" . astShow "  " $ ast)
+            TIO.putStrLn . T.intercalate "\n" . astShow "  " $ ast
+            pure $ Just ast
 
 pProgram :: Parser DecksProgram
 pProgram = fmap DecksProgram $ many (pStmt <* many newline) <* eof

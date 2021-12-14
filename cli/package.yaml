@@ -15,12 +15,17 @@ dependencies:
   - directory
   - filepath
   - fsnotify
-  - optparse-applicative
+  - hashable
   - megaparsec
+  - optparse-applicative
   - text
   - time
+  - transformers
+  - unordered-containers
 
 default-extensions:
+  - GeneralizedNewtypeDeriving
+  - LambdaCase
   - OverloadedStrings
   - RecordWildCards
 
