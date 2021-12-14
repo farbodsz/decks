@@ -74,12 +74,13 @@ pAttr = choice [pCssId, pCssClass, pCssProp]
 
 -- TODO: Support more characters, and escaped characters (like braces)
 pContent :: Parser Content
-pContent = T.strip . T.pack <$> some allowedChars
+pContent = Content . T.strip . T.pack <$> some allowedChars
     where allowedChars = noneOf ['{', '}']
 
-pContentTemplate :: Parser Text
+pContentTemplate :: Parser ContentTemplate
 pContentTemplate =
-    T.concat
+    ContentTemplate
+        .   T.concat
         <$> liftM5 list5
                    allowedChars
                    (templateStr "style")

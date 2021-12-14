@@ -29,7 +29,8 @@ data DecksStmt
         }
     deriving (Eq, Show)
 
-type ContentTemplate = Text
+newtype ContentTemplate = ContentTemplate Text
+    deriving (Eq, Show)
 
 -- | A drawable element statement.
 data DecksElement = DecksElement
@@ -39,7 +40,8 @@ data DecksElement = DecksElement
     }
     deriving (Eq, Show)
 
-type Content = Text
+newtype Content = Content Text
+    deriving (Eq, Show)
 
 -- | Elements can have attributes attached to them, referring to external CSS
 -- code.
