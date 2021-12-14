@@ -21,24 +21,32 @@ import           System.FilePath.Posix          ( takeFileName )
 data LogLevel
     = LogInfo
     | LogError
+    | LogSuccess
 
 logLevelTag :: LogLevel -> Text
-logLevelTag LogInfo  = "INFO "
-logLevelTag LogError = "ERROR"
+logLevelTag LogInfo    = "INFO "
+logLevelTag LogError   = "ERROR"
+logLevelTag LogSuccess = "DONE "
 
 logLevelColor :: LogLevel -> Color
-logLevelColor LogInfo  = Cyan
-logLevelColor LogError = Red
+logLevelColor LogInfo    = Cyan
+logLevelColor LogError   = Red
+logLevelColor LogSuccess = Green
 
 --------------------------------------------------------------------------------
 
 logEvent :: Event -> IO ()
 logEvent (Modified file time _) =
-    logMsg LogInfo time $ "Detected change in " <> T.pack (takeFileName file)
-logEvent _ = getCurrentTime >>= \time -> logMsg LogError time "Unknown event"
+    logMsgAt time LogInfo $ "Detected change in " <> T.pack (takeFileName file)
+logEvent _ = logMsg LogError "Unknown event"
 
-logMsg :: LogLevel -> UTCTime -> Text -> IO ()
-logMsg lvl time msg = do
+--------------------------------------------------------------------------------
+
+logMsg :: LogLevel -> Text -> IO ()
+logMsg lvl msg = getCurrentTime >>= \time -> logMsgAt time lvl msg
+
+logMsgAt :: UTCTime -> LogLevel -> Text -> IO ()
+logMsgAt time lvl msg = do
     setSGR [SetColor Foreground Vivid (logLevelColor lvl)]
     TIO.putStrLn
         $  "["

@@ -13,7 +13,6 @@ import           Control.Concurrent             ( threadDelay )
 import           Control.Monad                  ( forever )
 
 import qualified Data.Text                     as T
-import           Data.Time.Clock                ( getCurrentTime )
 
 import           System.Directory
 import           System.FSNotify
@@ -32,8 +31,7 @@ main = do
 watch :: FilePath -> Bool -> IO ()
 watch path False = getDecksFromDir path >>= mapM_ parseDecks
 watch path True  = withManager $ \mgr -> do
-    time <- getCurrentTime
-    logMsg LogInfo time $ "Watching directory " <> T.pack path
+    logMsg LogInfo $ "Watching directory " <> T.pack path
 
     -- Start a watching job (in the background)
     _ <- watchDir mgr path shouldCheckFile (processEvent path)

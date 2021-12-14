@@ -6,6 +6,7 @@ module Decks.Parser where
 
 import           Decks.AstShow
 import           Decks.Grammar
+import           Decks.Logging
 import           Decks.Utils
 
 import           Control.Monad
@@ -29,8 +30,11 @@ parseDecks :: FilePath -> IO ()
 parseDecks path = do
     contents <- T.pack <$> readFile path
     case runParser pProgram path contents of
-        Left  bundle -> putStrLn $ errorBundlePretty bundle
-        Right ast    -> TIO.putStrLn . T.intercalate "\n" . astShow "  " $ ast
+        Left bundle -> logMsg LogError "Unable to parse file"
+            >> putStrLn (errorBundlePretty bundle)
+        Right ast ->
+            logMsg LogSuccess "Parsed successfully"
+                >> (TIO.putStr . T.intercalate "\n" . astShow "  " $ ast)
 
 pProgram :: Parser DecksProgram
 pProgram = fmap DecksProgram $ many (pStmt <* many newline) <* eof
