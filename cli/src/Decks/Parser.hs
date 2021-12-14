@@ -2,11 +2,13 @@
 
 module Decks.Parser where
 
-import           Control.Monad                  ( liftM5 )
+import           Control.Monad
+
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import           Data.Void                      ( Void )
+
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 
@@ -110,19 +112,23 @@ pContent = T.strip . T.pack <$> some allowedChars
     where allowedChars = noneOf ['{', '}']
 
 pContentTemplate :: Parser Text
-pContentTemplate = liftM5
-    (\x1 x2 x3 x4 x5 -> T.concat [x1, x2, x3, x4, x5])
-    allowedChars
-    (templateStr "style")
-    allowedChars
-    (templateStr "content")
-    allowedChars
+pContentTemplate =
+    T.concat
+        <$> liftM5 list5
+                   allowedChars
+                   (templateStr "style")
+                   allowedChars
+                   (templateStr "content")
+                   allowedChars
   where
     allowedChars :: Parser Text
     allowedChars = fmap T.pack <$> some $ noneOf ['{', '}', '$']
 
     templateStr :: Text -> Parser Text
-    templateStr name = char '$' *> string name <* char '$'
+    templateStr name = T.concat <$> liftM3 list3
+                                           (T.singleton <$> char '$')
+                                           (string name)
+                                           (T.singleton <$> char '$')
 
 pIdentifier :: Parser Identifier
 pIdentifier = Identifier <$> identChars
@@ -146,5 +152,13 @@ bracketed f = char '[' *> space *> f <* space <* char ']'
 -- Optionally surrounded by double-quotation marks.
 optQuoted :: Parser a -> Parser a
 optQuoted f = (quoteChar *> f <* quoteChar) <|> f where quoteChar = char '"'
+
+--------------------------------------------------------------------------------
+
+list3 :: a -> a -> a -> [a]
+list3 x1 x2 x3 = [x1, x2, x3]
+
+list5 :: a -> a -> a -> a -> a -> [a]
+list5 x1 x2 x3 x4 x5 = [x1, x2, x3, x4, x5]
 
 --------------------------------------------------------------------------------
