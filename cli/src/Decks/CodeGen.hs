@@ -32,7 +32,7 @@ showCodeGenErr (UndefinedIdentifier i) =
     T.concat ["Undefined identifier '", unIdentifier i, "'"]
 showCodeGenErr EmptyContent        = "Element content cannot be empty"
 showCodeGenErr MultipleCssIds      = "HTML ID attributes must be unique"
-showCodeGenErr (InternalError msg) = "Unexpected error: " <> msg
+showCodeGenErr (InternalError msg) = "Internal error: " <> msg
 
 
 --------------------------------------------------------------------------------
@@ -42,11 +42,12 @@ showCodeGenErr (InternalError msg) = "Unexpected error: " <> msg
 type Html = Text
 type HtmlResult = Either CodeGenError Html
 
--- type ConstantsMap = M.HashMap Identifier DecksElement -- TODO:
 type DefinitionMap = M.HashMap Identifier ContentTemplate
+-- type VariableMap = M.HashMap Identifier DecksElement -- TODO:
 
 data DecksState = DecksState
     { stDefinitions :: DefinitionMap
+    -- , stVariables :: VariableMap
     }
 
 initDecksState :: DecksState
@@ -85,7 +86,7 @@ genProgram (DecksProgram stmts) = mapM genStmt stmts <&> combineResults
 genStmt :: DecksStmt -> State DecksState HtmlResult
 genStmt (DecksDrawStmt el ) = genElement el
 genStmt (DecksDefStmt i ct) = withState (insertDef i ct) (pure $ Right mempty)
-genStmt _                   = error "Not implemented"
+genStmt _                   = pure . Left . InternalError $ "Not implemented"
 
 genElement :: DecksElement -> State DecksState HtmlResult
 genElement (DecksElement i as mc) = gets (getIdentifier i) <&> \case
@@ -95,21 +96,10 @@ genElement (DecksElement i as mc) = gets (getIdentifier i) <&> \case
 -- | Returns the HTML representing a filled-in content template.
 fillContentTemplate
     :: [DecksAttr] -> Maybe Content -> ContentTemplate -> HtmlResult
--- TODO make cleaner
-fillContentTemplate as mc ct = case e_attrs of
-    Left  e1       -> Left e1
-    Right str_attr -> case e_content of
-        Left  e2          -> Left e2
-        Right str_content -> Right $ T.replace "$style$" str_attr $ T.replace
-            "$content$"
-            str_content
-            (unContentTemplate ct)
-  where
-    e_attrs :: HtmlResult
-    e_attrs = fillCtAttrs as
-
-    e_content :: HtmlResult
-    e_content = maybe (Left EmptyContent) (Right . unContent) mc
+fillContentTemplate as mc (ContentTemplate ct) = do
+    attrs   <- fillCtAttrs as
+    content <- maybe (Left EmptyContent) (Right . unContent) mc
+    pure . T.replace "$style$" attrs . T.replace "$content$" content $ ct
 
 data AttrHtmlResults = AttrHtmlResults
     { attrIdent   :: HtmlResult
