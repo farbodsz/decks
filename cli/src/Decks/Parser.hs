@@ -4,6 +4,8 @@
 --
 module Decks.Parser where
 
+import           Decks.AstShow
+import           Decks.Grammar
 import           Decks.Utils
 
 import           Control.Monad
@@ -11,56 +13,11 @@ import           Control.Monad
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
+import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
 
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
-
---------------------------------------------------------------------------------
-
--- | The Parse Syntax Tree for the Decks program.
-type DecksProgram = [DecksStmt]
-
--- | Identifies a drawable element.
-newtype Identifier = Identifier Text
-    deriving (Eq, Show)
-
-data DecksStmt
-    = DecksDrawStmt
-        { drawElem :: DecksElement
-        }
-    | DecksLetStmt
-        { letIdent :: Identifier
-        , letElem  :: DecksElement
-        }
-    | DecksDefStmt
-        { defIdent           :: Identifier
-        , defContentTemplate :: ContentTemplate
-        }
-    deriving (Eq, Show)
-
-type ContentTemplate = Text
-
--- | A drawable element statement.
-data DecksElement = DecksElement
-    { elIdent   :: Identifier
-    , elAttrs   :: [DecksAttr]
-    , elContent :: Maybe Content
-    }
-    deriving (Eq, Show)
-
-type Content = Text
-
--- | Elements can have attributes attached to them, referring to external CSS
--- code.
-data DecksAttr
-    = CssId Text              -- ^ E.g. @#identifier@
-    | CssClass Text           -- ^ E.g. @.class-name@
-    | CssProp                 -- ^ E.g. @key="val"@
-        { cssPropKey :: Text
-        , cssPropVal :: Text
-        }
-    deriving (Eq, Show)
 
 --------------------------------------------------------------------------------
 
@@ -71,12 +28,12 @@ type Parser = Parsec Void Text
 parseDecks :: FilePath -> IO ()
 parseDecks path = do
     contents <- T.pack <$> readFile path
-    putStrLn $ case runParser pProgram path contents of
-        Left  bundle -> errorBundlePretty bundle
-        Right ast    -> show ast
+    case runParser pProgram path contents of
+        Left  bundle -> putStrLn $ errorBundlePretty bundle
+        Right ast    -> TIO.putStrLn . T.intercalate "\n" . astShow "  " $ ast
 
 pProgram :: Parser DecksProgram
-pProgram = many (pStmt <* many newline) <* eof
+pProgram = fmap DecksProgram $ many (pStmt <* many newline) <* eof
 
 pStmt :: Parser DecksStmt
 pStmt = pDrawStmt <|> pLetStmt <|> pDefStmt
