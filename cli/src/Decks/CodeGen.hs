@@ -20,12 +20,19 @@ import qualified Data.Text.IO                  as TIO
 -- Error types and utility functions
 --------------------------------------------------------------------------------
 
-data CodeGenError = UndefinedIdentErr Identifier
+data CodeGenError
+    = UndefinedIdentifier Identifier
+    | EmptyContent
+    | MultipleCssIds
+    | InternalError Text
     deriving Eq
 
 showCodeGenErr :: CodeGenError -> Text
-showCodeGenErr (UndefinedIdentErr i) =
+showCodeGenErr (UndefinedIdentifier i) =
     T.concat ["Undefined identifier '", unIdentifier i, "'"]
+showCodeGenErr EmptyContent        = "Element content cannot be empty"
+showCodeGenErr MultipleCssIds      = "HTML ID attributes must be unique"
+showCodeGenErr (InternalError msg) = "Unexpected error: " <> msg
 
 
 --------------------------------------------------------------------------------
@@ -81,9 +88,76 @@ genStmt (DecksDefStmt i ct) = withState (insertDef i ct) (pure $ Right mempty)
 genStmt _                   = error "Not implemented"
 
 genElement :: DecksElement -> State DecksState HtmlResult
--- FIXME: include attributes and classes
-genElement (DecksElement i _ _) = gets (getIdentifier i) <&> \case
-    Nothing -> Left $ UndefinedIdentErr i
-    Just ct -> Right $ unContentTemplate ct
+genElement (DecksElement i as mc) = gets (getIdentifier i) <&> \case
+    Nothing -> Left $ UndefinedIdentifier i
+    Just ct -> fillContentTemplate as mc ct
+
+-- | Returns the HTML representing a filled-in content template.
+fillContentTemplate
+    :: [DecksAttr] -> Maybe Content -> ContentTemplate -> HtmlResult
+-- TODO make cleaner
+fillContentTemplate as mc ct = case e_attrs of
+    Left  e1       -> Left e1
+    Right str_attr -> case e_content of
+        Left  e2          -> Left e2
+        Right str_content -> Right $ T.replace "$style$" str_attr $ T.replace
+            "$content$"
+            str_content
+            (unContentTemplate ct)
+  where
+    e_attrs :: HtmlResult
+    e_attrs = fillCtAttrs as
+
+    e_content :: HtmlResult
+    e_content = maybe (Left EmptyContent) (Right . unContent) mc
+
+data AttrHtmlResults = AttrHtmlResults
+    { attrIdent   :: HtmlResult
+    , attrClasses :: HtmlResult
+    , attrStyles  :: HtmlResult
+    }
+
+-- | Returns the HTML attributes text corresponding to the Decks attributes,
+-- i.e. HTML @id@, @class@, and @style@ attributes.
+fillCtAttrs :: [DecksAttr] -> HtmlResult
+fillCtAttrs = attrsToHtml . processAttributes
+  where
+    attrsToHtml :: AttrHtmlResults -> HtmlResult
+    attrsToHtml AttrHtmlResults {..} =
+        fmap (T.strip . T.unwords)
+            . sequenceA
+            $ [attrIdent, attrClasses, attrStyles]
+
+    processAttributes :: [DecksAttr] -> AttrHtmlResults
+    processAttributes as =
+        let isId (CssId _) = True
+            isId _         = False
+            isClass (CssClass _) = True
+            isClass _            = False
+            isStyle (CssProp _ _) = True
+            isStyle _             = False
+            process converter predicate = converter . filter predicate $ as
+        in  AttrHtmlResults { attrIdent   = process idsToHtml isId
+                            , attrClasses = process classesToHtml isClass
+                            , attrStyles  = process stylesToHtml isStyle
+                            }
+
+    idsToHtml :: [DecksAttr] -> HtmlResult
+    idsToHtml []        = Right ""
+    idsToHtml [CssId i] = Right $ "id=\"" <> i <> "\""
+    idsToHtml _         = Left MultipleCssIds
+
+    classesToHtml :: [DecksAttr] -> HtmlResult
+    classesToHtml [] = Right ""
+    classesToHtml cs =
+        let clsNames = T.unwords $ map (\(CssClass name) -> "." <> name) cs
+        in  Right $ "class=\"" <> clsNames <> "\""
+
+    -- TODO: Disallow double quotes in attributes
+    stylesToHtml :: [DecksAttr] -> HtmlResult
+    stylesToHtml [] = Right ""
+    stylesToHtml ps =
+        let kvTexts = T.unwords $ map (\(CssProp k v) -> k <> ":" <> v) ps
+        in  Right $ "style=\"" <> kvTexts <> "\""
 
 --------------------------------------------------------------------------------

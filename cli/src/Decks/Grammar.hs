@@ -41,7 +41,7 @@ data DecksElement = DecksElement
     }
     deriving (Eq, Show)
 
-newtype Content = Content Text
+newtype Content = Content { unContent :: Text }
     deriving (Eq, Show)
 
 -- | Elements can have attributes attached to them, referring to external CSS
