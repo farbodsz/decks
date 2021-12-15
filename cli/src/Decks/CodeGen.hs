@@ -38,8 +38,14 @@ initDecksState = DecksState M.empty
 insertDef :: Identifier -> ContentTemplate -> DecksState -> DecksState
 insertDef i ct (DecksState defs) = DecksState $ M.insert i ct defs
 
+-- | Returns True if the identifier has already been defined in a prior program
+-- statement.
+alreadyDefined :: Identifier -> DecksState -> Bool
+alreadyDefined i (DecksState defs) = M.member i defs
+
+-- | Retrieves an identifier, from some type of prior statement.
 getIdentifier :: Identifier -> DecksState -> Maybe ContentTemplate
-getIdentifier i DecksState {..} = M.lookup i stDefinitions
+getIdentifier i (DecksState defs) = M.lookup i defs
 
 
 --------------------------------------------------------------------------------
@@ -67,8 +73,17 @@ genProgram (DecksProgram stmts) = mapM genStmt stmts <&> combineResults
 -- | Generates HTML output from a Decks statement.
 genStmt :: DecksStmt -> State DecksState HtmlResult
 genStmt (DecksDrawStmt el ) = genElement el
-genStmt (DecksDefStmt i ct) = withState (insertDef i ct) (pure $ Right mempty)
+genStmt (DecksDefStmt i ct) = whenIdentValid i (insertDef i ct)
 genStmt _                   = pure . Left . InternalError $ "Not implemented"
+
+-- | 'whenIdentifierValid' @identifier modifyFunction@ applies the function to
+-- the state if the identifier does not already exist, otherwise returns an
+-- error.
+whenIdentValid
+    :: Identifier -> (DecksState -> DecksState) -> State DecksState HtmlResult
+whenIdentValid ident f = get >>= \st -> if alreadyDefined ident st
+    then pure $ Left $ MultipleDefinitions ident
+    else modify f >> pure (Right mempty)
 
 genElement :: DecksElement -> State DecksState HtmlResult
 genElement (DecksElement i as mc) = gets (getIdentifier i) <&> \case
