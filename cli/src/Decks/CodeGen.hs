@@ -9,6 +9,7 @@ import           Decks.Grammar
 import           Decks.Logging
 
 import           Control.Applicative            ( (<|>) )
+import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
 import           Data.Functor                   ( (<&>) )
@@ -64,32 +65,52 @@ updatePct PendingContentTemplate {..} as mc =
 
 type VariableMap = M.HashMap Identifier PendingContentTemplate
 
-data DecksState = DecksState
+data DecksStore = DecksStore
     { stDefinitions :: VariableMap
     , stLetBindings :: VariableMap
     }
 
-initDecksState :: DecksState
-initDecksState = DecksState M.empty M.empty
+initDecksStore :: DecksStore
+initDecksStore = DecksStore M.empty M.empty
 
-insertDef :: Identifier -> ContentTemplate -> DecksState -> DecksState
-insertDef i ct (DecksState defs lets) = DecksState (M.insert i pct defs) lets
+insertDef :: Identifier -> ContentTemplate -> DecksStore -> DecksStore
+insertDef i ct (DecksStore defs lets) = DecksStore (M.insert i pct defs) lets
     where pct = PendingContentTemplate ct [] Nothing
 
-insertLet :: Identifier -> PendingContentTemplate -> DecksState -> DecksState
-insertLet i t (DecksState defs lets) = DecksState defs (M.insert i t lets)
+insertLet :: Identifier -> PendingContentTemplate -> DecksStore -> DecksStore
+insertLet i t (DecksStore defs lets) = DecksStore defs (M.insert i t lets)
 
 -- | Returns True if the identifier has already been defined in a prior program
 -- statement.
-alreadyDefined :: Identifier -> DecksState -> Bool
-alreadyDefined i (DecksState defs lets) = M.member i defs || M.member i lets
+alreadyDefined :: Identifier -> DecksStore -> Bool
+alreadyDefined i (DecksStore defs lets) = M.member i defs || M.member i lets
 
--- | Retrieves an identifier, from some type of prior statement.
-lookupIdentifier :: Identifier -> DecksState -> Maybe PendingContentTemplate
-lookupIdentifier i (DecksState defs lets) = mapMaybeFirst (M.lookup i) srcs
+-- | Lookups up an identifier from the map of existing declarations.
+lookupIdentifier :: Identifier -> DecksStore -> Maybe PendingContentTemplate
+lookupIdentifier i (DecksStore defs lets) = mapMaybeFirst (M.lookup i) srcs
   where
     mapMaybeFirst f = listToMaybe . mapMaybe f
     srcs = [defs, lets]
+
+
+--------------------------------------------------------------------------------
+-- Decks monad stack
+--------------------------------------------------------------------------------
+
+type DecksM = StateT DecksStore (Either CodeGenError)
+
+-- | Retrieves the pending content template of the given identifier.
+getIdentPct :: Identifier -> DecksM PendingContentTemplate
+getIdentPct i = gets (lookupIdentifier i) >>= \case
+    Nothing  -> lift $ Left $ UndefinedIdentifier i
+    Just pct -> lift $ Right pct
+
+-- | 'getUniqIdent' @identifier@ returns the identifier if not already declared,
+-- otherwise an error.
+getUniqIdent :: Identifier -> DecksM Identifier
+getUniqIdent ident = get >>= \store -> lift $ if alreadyDefined ident store
+    then Left $ MultipleDefinitions ident
+    else Right ident
 
 
 --------------------------------------------------------------------------------
@@ -98,7 +119,7 @@ lookupIdentifier i (DecksState defs lets) = mapMaybeFirst (M.lookup i) srcs
 
 -- | Runs the code generation, logging the successful result or error.
 runCodeGen :: DecksProgram -> IO ()
-runCodeGen p = case evalState (genProgram p) initDecksState of
+runCodeGen p = case evalStateT (genProgram p) initDecksStore of
     Left  err -> logMsg LogError $ showCodeGenErr err
     Right res -> do
         logMsg LogSuccess "Generated HTML output successfully"
@@ -110,35 +131,24 @@ runCodeGen p = case evalState (genProgram p) initDecksState of
 --------------------------------------------------------------------------------
 
 -- | Returns either successfully generated HTML from the Decks AST, or an error.
-genProgram :: DecksProgram -> State DecksState HtmlResult
-genProgram (DecksProgram stmts) = mapM genStmt stmts <&> combineResults
-    where combineResults = fmap T.concat . sequenceA
+genProgram :: DecksProgram -> DecksM Html
+genProgram (DecksProgram stmts) = mapM genStmt stmts <&> T.concat
 
 -- | Generates HTML output from a Decks statement.
-genStmt :: DecksStmt -> State DecksState HtmlResult
-genStmt (DecksDrawStmt el) = genElement el
-genStmt (DecksDefStmt i ct) = whenIdentUniq i (modify $ insertDef i ct)
-genStmt (DecksLetStmt i DecksElement {..}) = whenIdentUniq i $ do
-    m_pct <- gets $ lookupIdentifier elIdent
-    case m_pct of
-        Nothing  -> pure $ Left $ UndefinedIdentifier elIdent
-        Just pct -> withState
-            (insertLet i (updatePct pct elAttrs elContent))
-            (pure $ Right (mempty :: Text))
+genStmt :: DecksStmt -> DecksM Html
+genStmt (DecksDrawStmt el ) = genElement el
+genStmt (DecksDefStmt i ct) = do
+    ident <- getUniqIdent i
+    withStateT (insertDef ident ct) (pure mempty)
+genStmt (DecksLetStmt i DecksElement {..}) = do
+    ident <- getUniqIdent i
+    pct   <- getIdentPct elIdent
+    withStateT (insertLet ident (updatePct pct elAttrs elContent)) (pure mempty)
 
--- | 'whenIdentUniq' @identifier modifyFunction@ applies the function to
--- the state if the identifier does not already exist, otherwise returns an
--- error.
-whenIdentUniq
-    :: Identifier -> State DecksState a -> State DecksState HtmlResult
-whenIdentUniq ident f = get >>= \st -> if alreadyDefined ident st
-    then pure $ Left $ MultipleDefinitions ident
-    else f >> pure (Right mempty)
-
-genElement :: DecksElement -> State DecksState HtmlResult
-genElement DecksElement {..} = gets (lookupIdentifier elIdent) <&> \case
-    Nothing  -> Left $ UndefinedIdentifier elIdent
-    Just pct -> fillContentTemplate $ updatePct pct elAttrs elContent
+genElement :: DecksElement -> DecksM Html
+genElement DecksElement {..} = do
+    pct <- getIdentPct elIdent
+    lift $ fillContentTemplate $ updatePct pct elAttrs elContent
 
 -- | Returns the HTML representing a filled-in content template.
 fillContentTemplate :: PendingContentTemplate -> HtmlResult
