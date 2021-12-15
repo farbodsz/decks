@@ -96,7 +96,7 @@ pContentTemplate =
         .   T.concat
         <$> liftM5 list5
                    allowedChars
-                   (templateStr "style")
+                   (templateStr "attrs")
                    allowedChars
                    (templateStr "content")
                    allowedChars

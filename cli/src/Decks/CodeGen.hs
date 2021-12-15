@@ -81,7 +81,7 @@ fillContentTemplate
 fillContentTemplate as mc (ContentTemplate ct) = do
     attrs   <- fillCtAttrs as
     content <- maybe (Left EmptyContent) (Right . unContent) mc
-    pure . T.replace "$style$" attrs . T.replace "$content$" content $ ct
+    pure . T.replace "$attrs$" attrs . T.replace "$content$" content $ ct
 
 data AttrHtmlResults = AttrHtmlResults
     { attrIdent   :: HtmlResult
@@ -125,7 +125,6 @@ fillCtAttrs = attrsToHtml . processAttributes
         let clsNames = T.unwords $ map (\(CssClass name) -> "." <> name) cs
         in  Right $ "class=\"" <> clsNames <> "\""
 
-    -- TODO: Disallow double quotes in attributes
     stylesToHtml :: [DecksAttr] -> HtmlResult
     stylesToHtml [] = Right ""
     stylesToHtml ps =

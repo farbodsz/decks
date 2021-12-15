@@ -77,14 +77,14 @@ main = hspec $ do
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do
-            let ct = "<h1 $style$>$content$</h1>"
+            let ct = "<h1 $attrs$>$content$</h1>"
             parse pContentTemplate "" ct `shouldParse` ContentTemplate ct
-        it "requires a style template string" $ do
+        it "requires an attribute template string" $ do
             parse pContentTemplate ""
-                `shouldFailOn` "<h1 $not a style$>$content$</h1>"
+                `shouldFailOn` "<h1 $not an attr$>$content$</h1>"
         it "requires a content template string" $ do
             parse pContentTemplate ""
-                `shouldFailOn` "<h1 $style$>$not a content$</h1>"
+                `shouldFailOn` "<h1 $attrs$>$not a content$</h1>"
 
     describe "pDrawStmt" $ do
         it "ignores extra whitespaces" $ do
@@ -111,7 +111,7 @@ main = hspec $ do
 
     describe "pDefineStmt" $ do
         it "recognises a simple definition" $ do
-            let ct = "<h1 $style$>$content$</h1>"
+            let ct = "<h1 $attrs$>$content$</h1>"
             parse pDefStmt "" ("!def h1 = {" <> ct <> "}")
                 `shouldParse` DecksDefStmt
                                   (Identifier "h1")
