@@ -85,8 +85,8 @@ alreadyDefined :: Identifier -> DecksState -> Bool
 alreadyDefined i (DecksState defs lets) = M.member i defs || M.member i lets
 
 -- | Retrieves an identifier, from some type of prior statement.
-getIdentifier :: Identifier -> DecksState -> Maybe PendingContentTemplate
-getIdentifier i (DecksState defs lets) = mapMaybeFirst (M.lookup i) srcs
+lookupIdentifier :: Identifier -> DecksState -> Maybe PendingContentTemplate
+lookupIdentifier i (DecksState defs lets) = mapMaybeFirst (M.lookup i) srcs
   where
     mapMaybeFirst f = listToMaybe . mapMaybe f
     srcs = [defs, lets]
@@ -119,7 +119,7 @@ genStmt :: DecksStmt -> State DecksState HtmlResult
 genStmt (DecksDrawStmt el) = genElement el
 genStmt (DecksDefStmt i ct) = whenIdentUniq i (modify $ insertDef i ct)
 genStmt (DecksLetStmt i DecksElement {..}) = whenIdentUniq i $ do
-    m_pct <- gets $ getIdentifier elIdent
+    m_pct <- gets $ lookupIdentifier elIdent
     case m_pct of
         Nothing  -> pure $ Left $ UndefinedIdentifier elIdent
         Just pct -> withState
@@ -136,7 +136,7 @@ whenIdentUniq ident f = get >>= \st -> if alreadyDefined ident st
     else f >> pure (Right mempty)
 
 genElement :: DecksElement -> State DecksState HtmlResult
-genElement DecksElement {..} = gets (getIdentifier elIdent) <&> \case
+genElement DecksElement {..} = gets (lookupIdentifier elIdent) <&> \case
     Nothing  -> Left $ UndefinedIdentifier elIdent
     Just pct -> fillContentTemplate $ updatePct pct elAttrs elContent
 
