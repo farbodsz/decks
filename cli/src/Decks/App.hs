@@ -34,7 +34,8 @@ watch path False = getDecksFromDir path >>= mapM_ processFile
 watch path True  = withManager $ \mgr -> do
     logMsg LogInfo $ "Watching directory " <> T.pack path
 
-    -- Start a watching job (in the background)
+    -- Process once before watching for further changes in the background
+    getDecksFromDir path >>= mapM_ processFile
     _ <- watchDir mgr path shouldCheckFile (processEvent path)
 
     -- Sleep forever (until interrupted)
