@@ -20,16 +20,19 @@ import           System.FilePath.Posix          ( takeFileName )
 
 data LogLevel
     = LogInfo
+    | LogWarn
     | LogError
     | LogSuccess
 
 logLevelTag :: LogLevel -> Text
 logLevelTag LogInfo    = "INFO "
+logLevelTag LogWarn    = "WARN "
 logLevelTag LogError   = "ERROR"
 logLevelTag LogSuccess = "DONE "
 
 logLevelColor :: LogLevel -> Color
 logLevelColor LogInfo    = Cyan
+logLevelColor LogWarn    = Yellow
 logLevelColor LogError   = Red
 logLevelColor LogSuccess = Green
 

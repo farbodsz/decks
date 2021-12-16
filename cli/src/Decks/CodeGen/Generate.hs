@@ -22,14 +22,16 @@ genProgram (DecksProgram stmts) = mapM genStmt stmts <&> T.concat
 
 -- | Generates HTML output from a Decks statement.
 genStmt :: DecksStmt -> DecksM Html
-genStmt (DecksDrawStmt el ) = genElement el
+genStmt (DecksDrawStmt l  ) = withStateT (markUsage (elIdent l)) (genElement l)
 genStmt (DecksDefStmt i ct) = do
     ident <- getUniqIdent i
     withStateT (insertDef ident ct) (pure mempty)
 genStmt (DecksLetStmt i DecksElement {..}) = do
     ident <- getUniqIdent i
     pct   <- getIdentPct elIdent
-    withStateT (insertLet ident (updatePct pct elAttrs elContent)) (pure mempty)
+    withStateT
+        (markUsage elIdent . insertLet ident (updatePct pct elAttrs elContent))
+        (pure mempty)
 genStmt (DecksComment _) = pure mempty
 
 genElement :: DecksElement -> DecksM Html

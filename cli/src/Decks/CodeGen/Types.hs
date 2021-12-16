@@ -56,34 +56,47 @@ updatePct
 updatePct PendingContentTemplate {..} as mc =
     PendingContentTemplate pctTemplate (as `union` pctAttrs) (mc <|> pctContent)
 
+-- | The (pending) content represented by each identifier.
 type VariableMap = M.HashMap Identifier PendingContentTemplate
 
+-- | Number of usages for each identifier.
+type UsageMap = M.HashMap Identifier Int
+
 data DecksStore = DecksStore
-    { stDefinitions :: VariableMap
-    , stLetBindings :: VariableMap
+    { stDefs   :: VariableMap
+    , stLets   :: VariableMap
+    , stUsages :: UsageMap
     }
 
 initDecksStore :: DecksStore
-initDecksStore = DecksStore M.empty M.empty
+initDecksStore = DecksStore M.empty M.empty M.empty
 
 insertDef :: Identifier -> ContentTemplate -> DecksStore -> DecksStore
-insertDef i ct (DecksStore defs lets) = DecksStore (M.insert i pct defs) lets
+insertDef i ct DecksStore {..} = DecksStore (M.insert i pct stDefs)
+                                            stLets
+                                            (M.insert i 0 stUsages)
     where pct = PendingContentTemplate ct [] Nothing
 
 insertLet :: Identifier -> PendingContentTemplate -> DecksStore -> DecksStore
-insertLet i t (DecksStore defs lets) = DecksStore defs (M.insert i t lets)
+insertLet i t DecksStore {..} =
+    DecksStore stDefs (M.insert i t stLets) (M.insert i 0 stUsages)
+
+-- | Marks the usage of the given identifier.
+markUsage :: Identifier -> DecksStore -> DecksStore
+markUsage i DecksStore {..} = DecksStore stDefs stLets updatedUsages
+    where updatedUsages = M.insertWith (\_ old -> old + 1) i 1 stUsages
 
 -- | Returns True if the identifier has already been defined in a prior program
 -- statement.
 alreadyDefined :: Identifier -> DecksStore -> Bool
-alreadyDefined i (DecksStore defs lets) = M.member i defs || M.member i lets
+alreadyDefined i DecksStore {..} = M.member i stDefs || M.member i stLets
 
 -- | Lookups up an identifier from the map of existing declarations.
 lookupIdentifier :: Identifier -> DecksStore -> Maybe PendingContentTemplate
-lookupIdentifier i (DecksStore defs lets) = mapMaybeFirst (M.lookup i) srcs
+lookupIdentifier i DecksStore {..} = mapMaybeFirst (M.lookup i) srcs
   where
     mapMaybeFirst f = listToMaybe . mapMaybe f
-    srcs = [defs, lets]
+    srcs = [stDefs, stLets]
 
 --------------------------------------------------------------------------------
 
