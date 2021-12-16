@@ -53,18 +53,17 @@ main = hspec $ do
         it "can include let inside" $ do
             let
                 str
-                    = "\
-                \ foo {\
-                \   !let bar = oof [.custom-class] { \"default\" }\
-                \   bar\
-                \   bar { \"overridden\" }\
+                    = "foo {\n\
+                \   !let bar = oof [.custom-class] { \"default\" }\n\
+                \   bar\n\
+                \   bar { \"overridden\" }\n\
                 \ }\
                 \"
             parse pElement "" str `shouldParse` DecksElement
                 (Identifier "foo")
                 []
                 [ DecksLetStmt
-                    { letIdent = Identifier "foo"
+                    { letIdent = Identifier "bar"
                     , letElem  = DecksElement
                                      { elIdent = Identifier "oof"
                                      , elAttrs = [CssClass "custom-class"]
