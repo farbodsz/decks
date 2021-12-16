@@ -11,7 +11,8 @@ endif
 let b:current_syntax = 'decks'
 
 
-syn match decksInvalid /\v^[^\W!\-]+/
+syn match decksInvalid /\v^[^\/\W!\-]+/
+syn match decksComment /\v^\/\/.*$/
 
 syn match decksDraw /\v^[A-Za-z0-9]+/
 
@@ -32,6 +33,7 @@ syn match decksInclude /!include/
 
 
 hi def link decksInvalid Error
+hi def link decksComment Comment
 
 hi def link decksDraw Type
 
