@@ -1,0 +1,24 @@
+name: Vim
+
+on:
+  push:
+    paths:
+      - ".github/workflows/vim.yml"
+      - "vim/**"
+
+jobs:
+  vint:
+    name: Vint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Install Vint
+        run: |
+          pip install vim-vint
+
+      - name: Run Vint
+        run: |
+          vint vim/**/*.vim
