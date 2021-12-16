@@ -21,12 +21,9 @@ import qualified Data.Text.IO                  as TIO
 
 --------------------------------------------------------------------------------
 
-outPath :: FilePath
-outPath = "presentation.html"
-
 -- | Runs the code generation, logging the successful result or error.
-runCodeGen :: DecksProgram -> IO ()
-runCodeGen p = case runStateT (genProgram p) initDecksStore of
+runCodeGen :: FilePath -> DecksProgram -> IO ()
+runCodeGen outPath p = case runStateT (genProgram p) initDecksStore of
     Left  err           -> logMsg LogError $ showCodeGenErr err
     Right (html, store) -> do
         generateWarnings store

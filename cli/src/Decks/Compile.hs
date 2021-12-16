@@ -9,9 +9,9 @@ import           Decks.Parser                   ( parseDecks )
 
 --------------------------------------------------------------------------------
 
-compile :: FilePath -> IO ()
-compile file = parseDecks file >>= \case
+compile :: FilePath -> FilePath -> IO ()
+compile file outPath = parseDecks file >>= \case
     Nothing  -> pure ()
-    Just ast -> runCodeGen ast
+    Just ast -> runCodeGen outPath ast
 
 --------------------------------------------------------------------------------
