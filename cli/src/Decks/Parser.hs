@@ -1,7 +1,5 @@
 --------------------------------------------------------------------------------
 
-{-# LANGUAGE TypeApplications #-}
-
 -- | Produces a parse tree from the input file.
 --
 module Decks.Parser where
@@ -13,13 +11,13 @@ import           Decks.Utils
 
 import           Control.Monad
 
+import           Data.Char                      ( isSpace )
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
 
-import           Data.Char                      ( isSpace )
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 
@@ -46,7 +44,7 @@ pProgram :: Parser DecksProgram
 pProgram = fmap DecksProgram $ many (pStmt <* many newline) <* eof
 
 pStmt :: Parser DecksStmt
-pStmt = pDrawStmt <|> pLetStmt <|> pDefStmt
+pStmt = pDrawStmt <|> pLetStmt <|> pDefStmt <|> pComment
 
 pDrawStmt :: Parser DecksStmt
 pDrawStmt = DecksDrawStmt <$> pElement
@@ -62,6 +60,10 @@ pDefStmt =
     DecksDefStmt
         <$> (string "!def" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> braced pContentTemplate)
+
+pComment :: Parser DecksStmt
+pComment = DecksComment <$> (string "//" *> commentChars)
+    where commentChars = fmap T.pack . many $ noneOf ['\n', '\r']
 
 pElement :: Parser DecksElement
 pElement =

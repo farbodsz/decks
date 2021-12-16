@@ -28,6 +28,9 @@ data DecksStmt
         { defIdent           :: Identifier
         , defContentTemplate :: ContentTemplate
         }
+    | DecksComment
+        { commentText :: Text
+        }
     deriving (Eq, Show)
 
 newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }

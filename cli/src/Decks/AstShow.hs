@@ -30,6 +30,7 @@ instance AstShow DecksStmt where
         treeFmt w "LetStmt" $ astShow w i ++ astShow w el
     astShow w (DecksDefStmt i ct) =
         treeFmt w "DefStmt" $ astShow w i ++ astShow w ct
+    astShow w (DecksComment txt) = treeFmt w "Comment" [txt]
 
 instance AstShow DecksElement where
     astShow w (DecksElement i as c) = treeFmt w "Element" $ concat $ catMaybes

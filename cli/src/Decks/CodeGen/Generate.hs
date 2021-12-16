@@ -30,6 +30,7 @@ genStmt (DecksLetStmt i DecksElement {..}) = do
     ident <- getUniqIdent i
     pct   <- getIdentPct elIdent
     withStateT (insertLet ident (updatePct pct elAttrs elContent)) (pure mempty)
+genStmt (DecksComment _) = pure mempty
 
 genElement :: DecksElement -> DecksM Html
 genElement DecksElement {..} = do
