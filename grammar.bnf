@@ -1,24 +1,32 @@
+# This is used for planning only and does not represent the final grammar.
+
 program ::= [stmt]
 
 stmt ::= draw_stmt
       |  cmd_stmt
+      |  comment
 
+comment ::= "//" any
+
+draw_stmt ::= element_stmt
 cmd_stmt ::= let_stmt
-           | include_stmt
+           | def_stmt
+           | include_stmt  # TODO
 
 let_stmt ::= "!let" identifier "=" element_stmt
-          |  "!let" identifier "=" "{{" content_template "}}"
+
+def_stmt ::= "!def" identifier "=" "{" content_template "}"
+content_template ::= any "$attrs$" any "$content$" any
 
 include_stmt ::= "!include" "\"" path "\""
-
 path ::= [A-Za-z/.]+
-
-content_template ::= any "!content" any
 
 element_stmt ::= identifier "[" attrs "]" "{" content "}"
               |  identifier "[" attrs "]"
               |  identifier "{" content "}"
               |  identifier
+
+content ::= any
 
 attrs ::= css_identifier
        |  css_class
