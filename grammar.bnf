@@ -1,25 +1,35 @@
+# Decks Grammar
 # This is used for planning only and does not represent the final grammar.
 
+# PROGRAM
+
 program ::= [stmt]
+
+
+# STATEMENTS
 
 stmt ::= draw_stmt
       |  cmd_stmt
       |  comment
 
-comment ::= "//" any
-
 draw_stmt ::= element_stmt
 cmd_stmt ::= let_stmt
            | def_stmt
            | include_stmt  # TODO
+comment ::= "//" any
+
+
+# COMMAND STATEMENTS
 
 let_stmt ::= "!let" identifier "=" element_stmt
-
 def_stmt ::= "!def" identifier "=" "{" content_template "}"
-content_template ::= any "$attrs$" any "$content$" any
-
 include_stmt ::= "!include" "\"" path "\""
+
+content_template ::= any "$attrs$" any "$content$" any
 path ::= [A-Za-z/.]+
+
+
+# DRAW STATEMENTS
 
 element_stmt ::= identifier "[" attrs "]" "{" content "}"
               |  identifier "[" attrs "]"
@@ -35,5 +45,8 @@ attrs ::= css_identifier
 css_identifier ::= "#" [A-Za-z\-_]+
 css_class      ::= "." [A-Za-z\-_]+
 css_style      ::= [A-Za-z\-_]+ "=" any
+
+
+# MISC 
 
 any ::= [A-Za-z\-_0-9%.]+
