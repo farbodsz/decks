@@ -29,17 +29,20 @@ main = do
 -- updating as they are modified, if @shouldWatch@ is True. Otherwise, the
 -- file(s) are only read once.
 watch :: Opts -> IO ()
-watch (Opts path outFile False) =
-    getDecksFromDir path >>= mapM_ (compile outFile)
-watch (Opts path outFile True) = withManager $ \mgr -> do
-    logMsg LogInfo $ "Watching directory " <> T.pack path
+watch Opts {..} = if not optWatch
+    then getDecksFromDir optDirPath >>= mapM_ (compile optOutPath optVerbose)
+    else withManager $ \mgr -> do
+        logMsg LogInfo $ "Watching directory " <> T.pack optDirPath
 
-    -- Process once before watching for further changes in the background
-    getDecksFromDir path >>= mapM_ (compile outFile)
-    _ <- watchDir mgr path shouldCheckFile (processEvent path outFile)
+        -- Process once before watching for further changes in the background
+        getDecksFromDir optDirPath >>= mapM_ (compile optOutPath optVerbose)
+        _ <- watchDir mgr
+                      optDirPath
+                      shouldCheckFile
+                      (processEvent optDirPath optOutPath optVerbose)
 
-    -- Sleep forever (until interrupted)
-    forever $ threadDelay 1000000
+        -- Sleep forever (until interrupted)
+        forever $ threadDelay 1000000
 
 -- | A list of Decks files in the directory.
 getDecksFromDir :: FilePath -> IO [FilePath]
@@ -52,10 +55,10 @@ shouldCheckFile _                   = False
 isDecksFile :: FilePath -> Bool
 isDecksFile fp = takeExtension fp == ".decks"
 
-processEvent :: FilePath -> FilePath -> Event -> IO ()
-processEvent _ outPath ev@(Modified file _ _) = do
+processEvent :: FilePath -> FilePath -> Bool -> Event -> IO ()
+processEvent _ outPath verbose ev@(Modified file _ _) = do
     logEvent ev
-    compile file outPath
-processEvent _ _ _ = pure ()
+    compile outPath verbose file
+processEvent _ _ _ _ = pure ()
 
 --------------------------------------------------------------------------------

@@ -4,8 +4,6 @@
 --
 module Decks.Parser where
 
-import           Debug.Trace
-
 import           Decks.AstShow
 import           Decks.Grammar
 import           Decks.Logging
@@ -29,8 +27,8 @@ type Parser = Parsec Void Text
 
 --------------------------------------------------------------------------------
 
-parseDecks :: FilePath -> IO (Maybe DecksProgram)
-parseDecks path = do
+parseDecks :: FilePath -> Bool -> IO (Maybe DecksProgram)
+parseDecks path verbose = do
     contents <- T.pack <$> readFile path
     case runParser pProgram path contents of
         Left bundle -> do
@@ -39,7 +37,11 @@ parseDecks path = do
             pure Nothing
         Right ast -> do
             logMsg LogSuccess "Parsed successfully"
-            TIO.putStrLn . T.intercalate "\n" . astShow "  " $ ast
+            when verbose
+                $ TIO.putStrLn
+                . T.intercalate "\n"
+                . astShow "  "
+                $ ast
             pure $ Just ast
 
 pProgram :: Parser DecksProgram
@@ -54,14 +56,13 @@ pDrawStmt = DecksDrawStmt <$> pElement
 
 pLetStmt :: Parser DecksStmt
 pLetStmt =
-    trace "pLet" DecksLetStmt
+    DecksLetStmt
         <$> (string "!let" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> pElement)
 
 pDefStmt :: Parser DecksStmt
 pDefStmt =
-    trace "pDef"
-        $   DecksDefStmt
+    DecksDefStmt
         <$> (string "!def" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> braced pContentTemplate)
 

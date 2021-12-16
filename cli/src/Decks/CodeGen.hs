@@ -12,7 +12,9 @@ import           Decks.Grammar                  ( DecksProgram(..)
                                                 )
 import           Decks.Logging
 
-import           Control.Monad                  ( forM_ )
+import           Control.Monad                  ( forM_
+                                                , when
+                                                )
 import           Control.Monad.Trans.State
 
 import qualified Data.HashMap.Lazy             as M
@@ -22,15 +24,21 @@ import qualified Data.Text.IO                  as TIO
 --------------------------------------------------------------------------------
 
 -- | Runs the code generation, logging the successful result or error.
-runCodeGen :: FilePath -> DecksProgram -> IO ()
-runCodeGen outPath p = case runStateT (genProgram p) initDecksStore of
+runCodeGen
+    :: FilePath         -- ^ Output file
+    -> Bool             -- ^ Verbose?
+    -> DecksProgram     -- ^ AST
+    -> IO ()
+runCodeGen outPath verbose p = case runStateT (genProgram p) initDecksStore of
     Left  err           -> logMsg LogError $ showCodeGenErr err
     Right (html, store) -> do
         generateWarnings store
+
         logMsg LogSuccess "Generated HTML output successfully"
-        TIO.putStrLn html
+        when verbose $ TIO.putStrLn html
+
         logMsg LogInfo $ "Writing output to " <> T.pack outPath
-        TIO.writeFile outPath html
+        when verbose $ TIO.writeFile outPath html
 
 generateWarnings :: DecksStore -> IO ()
 generateWarnings store =
