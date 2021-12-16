@@ -38,7 +38,7 @@ runCodeGen outPath verbose p = case runStateT (genProgram p) initDecksStore of
         when verbose $ TIO.putStrLn html
 
         logMsg LogInfo $ "Writing output to " <> T.pack outPath
-        when verbose $ TIO.writeFile outPath html
+        TIO.writeFile outPath html
 
 generateWarnings :: DecksStore -> IO ()
 generateWarnings store =
