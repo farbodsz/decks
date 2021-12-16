@@ -11,11 +11,14 @@ endif
 let b:current_syntax = 'decks'
 
 
+syn match decksInvalid /\v^[^\W!\-]+/
+
 syn match decksDraw /\v^[A-Za-z0-9]+/
 
-syn match decksCssId /\v#[A-Za-z0-9_-]+/
-syn match decksCssCls /\v\.[A-Za-z0-9_-]+/
-syn match decksCssStyle /\v[a-z-]+\=/
+syn region decksCssRegion start=/\[/ end=/\]/ contains=decksCssId,decksCssCls,decksCssStyle
+syn match decksCssId /\v#[A-Za-z0-9_-]+/ contained
+syn match decksCssCls /\v\.[A-Za-z0-9_-]+/ contained
+syn match decksCssStyle /\v[a-z-]+\=/ contained
 
 syn region decksContentRegion start=/{/ end=/}/ contains=decksContent,decksTemplate
 syn match decksContent /\v[^{}]+/ contains=decksTemplate contained
@@ -27,6 +30,8 @@ syn match decksKeyword /!def/
 syn match decksKeyword /!let/
 syn match decksInclude /!include/
 
+
+hi def link decksInvalid Error
 
 hi def link decksDraw Type
 
