@@ -4,6 +4,8 @@
 --
 module Decks.Parser where
 
+import           Debug.Trace
+
 import           Decks.AstShow
 import           Decks.Grammar
 import           Decks.Logging
@@ -41,25 +43,34 @@ parseDecks path = do
             pure $ Just ast
 
 pProgram :: Parser DecksProgram
-pProgram = fmap DecksProgram $ many (pStmt <* many newline) <* eof
+pProgram = DecksProgram <$> some pStmt <* eof
 
 pStmt :: Parser DecksStmt
-pStmt = pDrawStmt <|> pLetStmt <|> pDefStmt <|> pComment
+pStmt = choice [pDrawStmt, pLetStmt, pDefStmt, pLiteral, pComment]
+    <* many (newline *> space)
 
 pDrawStmt :: Parser DecksStmt
 pDrawStmt = DecksDrawStmt <$> pElement
 
 pLetStmt :: Parser DecksStmt
 pLetStmt =
-    DecksLetStmt
+    trace "pLet" DecksLetStmt
         <$> (string "!let" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> pElement)
 
 pDefStmt :: Parser DecksStmt
 pDefStmt =
-    DecksDefStmt
+    trace "pDef"
+        $   DecksDefStmt
         <$> (string "!def" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> braced pContentTemplate)
+
+-- TODO: Support more characters, and escaped characters (like braces)
+pLiteral :: Parser DecksStmt
+pLiteral = DecksLiteral . T.strip . T.pack <$> (singleLine <|> multiLine)
+  where
+    singleLine = "\"" *> many (noneOf ['"', '\n', '\r']) <* "\""
+    multiLine  = "[[" *> many (noneOf ['[', ']']) <* "]]"
 
 pComment :: Parser DecksStmt
 pComment = DecksComment <$> (string "//" *> commentChars)
@@ -70,7 +81,7 @@ pElement =
     DecksElement
         <$> (pIdentifier <* space)
         <*> (fromMaybe [] <$> optional attrSection <* space)
-        <*> optional (braced pContent)
+        <*> (fromMaybe [] <$> optional (braced (some pStmt)))
   where
     attrSection = char '[' *> space *> attrList <* space <* char ']' <* space
     -- Space following an attribute needs lookahead and backtracking with 'try'
@@ -86,11 +97,6 @@ pAttr = choice [pCssId, pCssClass, pCssProp]
       where
         valueChars = fmap T.pack . some $ satisfy tokPred
         tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
-
--- TODO: Support more characters, and escaped characters (like braces)
-pContent :: Parser Content
-pContent = Content . T.strip . T.pack <$> some allowedChars
-    where allowedChars = noneOf ['{', '}']
 
 pContentTemplate :: Parser ContentTemplate
 pContentTemplate =
@@ -133,6 +139,6 @@ bracketed f = char '[' *> space *> f <* space <* char ']'
 
 -- | Optionally surrounded by double-quotation marks.
 optQuoted :: Parser a -> Parser a
-optQuoted f = f <|> (quoteChar *> f <* quoteChar) where quoteChar = char '"'
+optQuoted f = f <|> quoteChar *> f <* quoteChar where quoteChar = char '"'
 
 --------------------------------------------------------------------------------

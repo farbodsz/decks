@@ -18,7 +18,10 @@ import qualified Data.Text                     as T
 
 -- | Returns either successfully generated HTML from the Decks AST, or an error.
 genProgram :: DecksProgram -> DecksM Html
-genProgram (DecksProgram stmts) = mapM genStmt stmts <&> T.concat
+genProgram (DecksProgram stmts) = genStmts stmts
+
+genStmts :: [DecksStmt] -> DecksM Html
+genStmts stmts = mapM genStmt stmts <&> T.concat
 
 -- | Generates HTML output from a Decks statement.
 genStmt :: DecksStmt -> DecksM Html
@@ -27,24 +30,26 @@ genStmt (DecksDefStmt i ct) = do
     ident <- getUniqIdent i
     withStateT (insertDef ident ct) (pure mempty)
 genStmt (DecksLetStmt i DecksElement {..}) = do
-    ident <- getUniqIdent i
-    pct   <- getIdentPct elIdent
+    ident   <- getUniqIdent i
+    pct     <- getIdentPct elIdent
+    content <- genStmts elStmts
     withStateT
-        (markUsage elIdent . insertLet ident (updatePct pct elAttrs elContent))
+        (markUsage elIdent . insertLet ident (updatePct pct elAttrs content))
         (pure mempty)
-genStmt (DecksComment _) = pure mempty
+genStmt (DecksLiteral txt) = pure txt
+genStmt (DecksComment _  ) = pure mempty
 
 genElement :: DecksElement -> DecksM Html
 genElement DecksElement {..} = do
-    pct <- getIdentPct elIdent
-    lift $ fillContentTemplate $ updatePct pct elAttrs elContent
+    pct     <- getIdentPct elIdent
+    content <- genStmts elStmts
+    lift $ fillContentTemplate $ updatePct pct elAttrs content
 
 -- | Returns the HTML representing a filled-in content template.
 fillContentTemplate :: PendingContentTemplate -> HtmlResult
-fillContentTemplate (PendingContentTemplate (ContentTemplate ct) as mc) = do
-    attrs   <- fillCtAttrs as
-    content <- maybe (Left EmptyContent) (Right . unContent) mc
-    pure . T.replace "$attrs$" attrs . T.replace "$content$" content $ ct
+fillContentTemplate (PendingContentTemplate (ContentTemplate ct) as ctnt) = do
+    attrs <- fillCtAttrs as
+    pure . T.replace "$attrs$" attrs . T.replace "$content$" ctnt $ ct
 
 data HtmlAttributes = HtmlAttributes
     { attrIdent   :: HtmlResult

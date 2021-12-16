@@ -1,6 +1,7 @@
 # Decks Grammar
 # This is used for planning only and does not represent the final grammar.
 
+
 # PROGRAM
 
 program ::= [stmt]
@@ -13,10 +14,11 @@ stmt ::= draw_stmt
       |  comment
 
 draw_stmt ::= element_stmt
+           |  string_literal
 cmd_stmt ::= let_stmt
            | def_stmt
            | include_stmt  # TODO
-comment ::= "//" any
+comment ::= "//" content_single_line
 
 
 # COMMAND STATEMENTS
@@ -31,12 +33,16 @@ path ::= [A-Za-z/.]+
 
 # DRAW STATEMENTS
 
-element_stmt ::= identifier "[" attrs "]" "{" content "}"
+element_stmt ::= identifier "[" attrs "]" "{" [stmt] "}"
               |  identifier "[" attrs "]"
-              |  identifier "{" content "}"
+              |  identifier "{" [stmt] "}"
               |  identifier
 
-content ::= any
+string_literal ::= "\"" content_single_line "\""
+                |  "[[" content_multi_line "]]"
+
+content_single_line ::= any
+content_multi_line ::= any | newline
 
 attrs ::= css_identifier
        |  css_class

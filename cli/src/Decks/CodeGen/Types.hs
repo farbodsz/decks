@@ -7,7 +7,6 @@ module Decks.CodeGen.Types where
 import           Decks.Error
 import           Decks.Grammar
 
-import           Control.Applicative            ( (<|>) )
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
@@ -44,17 +43,17 @@ data PendingContentTemplate = PendingContentTemplate
     -- ^ The template text with template strings like @$content$@..
     , pctAttrs    :: [DecksAttr]
     -- ^ Attributes waiting to be applied to the template.
-    , pctContent  :: Maybe Content
-    -- ^ Content waiting to be applied to the template.
+    , pctContent  :: Html
+    -- ^ Content to be applied to the template.
     }
 
 updatePct
     :: PendingContentTemplate     -- ^ Initial 'PendingContentTemplate'.
     -> [DecksAttr]                -- ^ Attributes overriding the initial ones.
-    -> Maybe Content              -- ^ Content overriding the initial one.
+    -> Html                       -- ^ Content overriding the initial one.
     -> PendingContentTemplate     -- ^ Resulting 'PendingContentTemplate'.
-updatePct PendingContentTemplate {..} as mc =
-    PendingContentTemplate pctTemplate (as `union` pctAttrs) (mc <|> pctContent)
+updatePct PendingContentTemplate {..} as =
+    PendingContentTemplate pctTemplate (as `union` pctAttrs)
 
 -- | The (pending) content represented by each identifier.
 type VariableMap = M.HashMap Identifier PendingContentTemplate
@@ -75,7 +74,7 @@ insertDef :: Identifier -> ContentTemplate -> DecksStore -> DecksStore
 insertDef i ct DecksStore {..} = DecksStore (M.insert i pct stDefs)
                                             stLets
                                             (M.insert i 0 stUsages)
-    where pct = PendingContentTemplate ct [] Nothing
+    where pct = PendingContentTemplate ct [] mempty
 
 insertLet :: Identifier -> PendingContentTemplate -> DecksStore -> DecksStore
 insertLet i t DecksStore {..} =

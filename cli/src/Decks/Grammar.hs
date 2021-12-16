@@ -28,6 +28,9 @@ data DecksStmt
         { defIdent           :: Identifier
         , defContentTemplate :: ContentTemplate
         }
+    | DecksLiteral
+        { litContent :: Text
+        }
     | DecksComment
         { commentText :: Text
         }
@@ -38,13 +41,10 @@ newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }
 
 -- | A drawable element statement.
 data DecksElement = DecksElement
-    { elIdent   :: Identifier
-    , elAttrs   :: [DecksAttr]
-    , elContent :: Maybe Content
+    { elIdent :: Identifier
+    , elAttrs :: [DecksAttr]
+    , elStmts :: [DecksStmt]
     }
-    deriving (Eq, Show)
-
-newtype Content = Content { unContent :: Text }
     deriving (Eq, Show)
 
 -- | Elements can have attributes attached to them, referring to external CSS
