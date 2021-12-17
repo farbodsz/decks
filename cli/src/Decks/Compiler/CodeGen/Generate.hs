@@ -7,6 +7,7 @@ module Decks.Compiler.CodeGen.Generate where
 import           Decks.Compiler.CodeGen.Types
 import           Decks.Compiler.Grammar
 import           Decks.Compiler.Error
+import Decks.Utils (Html)
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
