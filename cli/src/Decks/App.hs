@@ -6,6 +6,7 @@
 module Decks.App where
 
 import           Decks.Commands
+import           Decks.Compiler                 ( compile )
 import           Decks.Logging
 
 import           Control.Concurrent             ( threadDelay )
@@ -13,7 +14,6 @@ import           Control.Monad                  ( forever )
 
 import qualified Data.Text                     as T
 
-import           Decks.Compile                  ( compile )
 import           System.Directory
 import           System.FSNotify
 import           System.FilePath                ( takeExtension )

@@ -2,10 +2,10 @@
 
 -- | Types and utility functions for code generation.
 --
-module Decks.CodeGen.Types where
+module Decks.Compiler.CodeGen.Types where
 
-import           Decks.Error
-import           Decks.Grammar
+import           Decks.Compiler.Error
+import           Decks.Compiler.Grammar
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State

@@ -2,7 +2,7 @@
 
 -- | Grammar of the Decks DSL syntax.
 --
-module Decks.Grammar where
+module Decks.Compiler.Grammar where
 
 import           Data.Hashable                  ( Hashable )
 import           Data.Text                      ( Text )

@@ -2,10 +2,10 @@
 
 -- | Produces a parse tree from the input file.
 --
-module Decks.Parser where
+module Decks.Compiler.Parser where
 
-import           Decks.AstShow
-import           Decks.Grammar
+import           Decks.Compiler.AstShow
+import           Decks.Compiler.Grammar
 import           Decks.Logging
 import           Decks.Utils
 

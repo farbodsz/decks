@@ -2,11 +2,11 @@
 
 -- | Functions for generating HTML from AST nodes.
 --
-module Decks.CodeGen.Generate where
+module Decks.Compiler.CodeGen.Generate where
 
-import           Decks.CodeGen.Types
-import           Decks.Error
-import           Decks.Grammar
+import           Decks.Compiler.CodeGen.Types
+import           Decks.Compiler.Grammar
+import           Decks.Compiler.Error
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
