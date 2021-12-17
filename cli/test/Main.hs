@@ -2,8 +2,8 @@
 
 module Main where
 
-import           Decks.Grammar
-import           Decks.Parser
+import           Decks.Compiler.Grammar
+import           Decks.Compiler.Parser
 
 import           Test.Hspec
 import           Test.Hspec.Megaparsec
