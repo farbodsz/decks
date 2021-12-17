@@ -2,10 +2,11 @@
 
 -- | Types and utility functions for code generation.
 --
-module Decks.CodeGen.Types where
+module Decks.Compiler.CodeGen.Types where
 
-import           Decks.Error
-import           Decks.Grammar
+import           Decks.Compiler.Error
+import           Decks.Compiler.Grammar
+import           Decks.Utils                    ( Html )
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
@@ -13,11 +14,9 @@ import           Control.Monad.Trans.State
 import qualified Data.HashMap.Lazy             as M
 import           Data.List                      ( union )
 import           Data.Maybe
-import           Data.Text                      ( Text )
 
 --------------------------------------------------------------------------------
 
-type Html = Text
 type HtmlResult = Either CodeGenError Html
 
 -- | Represents a content template with some default HTML attributes, used for

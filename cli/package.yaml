@@ -11,17 +11,21 @@ description:
 
 dependencies:
   - base >= 4.7 && < 5
+  - aeson
   - ansi-terminal
+  - async
   - directory
   - filepath
   - fsnotify
   - hashable
   - megaparsec
   - optparse-applicative
+  - servant-server
   - text
   - time
   - transformers
   - unordered-containers
+  - warp
 
 default-extensions:
   - GeneralizedNewtypeDeriving

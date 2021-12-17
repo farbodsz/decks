@@ -2,12 +2,12 @@
 
 -- | Generates HTML code from the Decks parse tree.
 --
-module Decks.CodeGen where
+module Decks.Compiler.CodeGen where
 
-import           Decks.CodeGen.Generate
-import           Decks.CodeGen.Types
-import           Decks.Error
-import           Decks.Grammar                  ( DecksProgram(..)
+import           Decks.Compiler.CodeGen.Generate
+import           Decks.Compiler.CodeGen.Types
+import           Decks.Compiler.Error
+import           Decks.Compiler.Grammar         ( DecksProgram(..)
                                                 , Identifier(..)
                                                 )
 import           Decks.Logging

@@ -2,9 +2,9 @@
 
 -- | Pretty printing of the Decks AST.
 --
-module Decks.AstShow where
+module Decks.Compiler.AstShow where
 
-import           Decks.Grammar
+import           Decks.Compiler.Grammar
 
 import           Data.Text                      ( Text )
 

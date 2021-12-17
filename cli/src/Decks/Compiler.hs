@@ -2,10 +2,10 @@
 
 -- | Combines the parsing and code generation stages.
 --
-module Decks.Compile where
+module Decks.Compiler where
 
-import           Decks.CodeGen                  ( runCodeGen )
-import           Decks.Parser                   ( parseDecks )
+import           Decks.Compiler.CodeGen         ( runCodeGen )
+import           Decks.Compiler.Parser          ( parseDecks )
 
 --------------------------------------------------------------------------------
 

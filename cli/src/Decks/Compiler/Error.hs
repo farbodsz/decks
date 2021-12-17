@@ -2,9 +2,9 @@
 
 -- | Defines custom error types and error handling.
 --
-module Decks.Error where
+module Decks.Compiler.Error where
 
-import           Decks.Grammar
+import           Decks.Compiler.Grammar         ( Identifier(..) )
 
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T

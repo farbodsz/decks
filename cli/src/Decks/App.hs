@@ -6,14 +6,16 @@
 module Decks.App where
 
 import           Decks.Commands
+import           Decks.Compiler                 ( compile )
 import           Decks.Logging
+import           Decks.Server                   ( runServer )
 
 import           Control.Concurrent             ( threadDelay )
+import           Control.Concurrent.Async       ( concurrently_ )
 import           Control.Monad                  ( forever )
 
 import qualified Data.Text                     as T
 
-import           Decks.Compile                  ( compile )
 import           System.Directory
 import           System.FSNotify
 import           System.FilePath                ( takeExtension )
@@ -23,7 +25,7 @@ import           System.FilePath                ( takeExtension )
 main :: IO ()
 main = do
     opts <- parseCmd
-    watch opts
+    concurrently_ (runServer (optOutPath opts)) (watch opts)
 
 -- | watch @directory shouldWatch@ continuously watches for Decks files,
 -- updating as they are modified, if @shouldWatch@ is True. Otherwise, the
