@@ -25,7 +25,8 @@ import           System.FilePath                ( takeExtension )
 main :: IO ()
 main = do
     opts <- parseCmd
-    concurrently_ (runServer (optOutPath opts)) (watch opts)
+    concurrently_ (runServer (optOutPath opts) (optFrontendUrl opts))
+                  (watch opts)
 
 -- | watch @directory shouldWatch@ continuously watches for Decks files,
 -- updating as they are modified, if @shouldWatch@ is True. Otherwise, the

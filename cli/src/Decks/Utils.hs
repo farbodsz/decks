@@ -10,6 +10,8 @@ import Data.Text (Text)
 
 type Html = Text
 
+type URL = Text
+
 --------------------------------------------------------------------------------
 
 -- | A list of the given three arguments.

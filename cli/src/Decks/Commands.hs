@@ -4,15 +4,18 @@
 --
 module Decks.Commands where
 
+import           Decks.Utils                    ( URL )
+
 import           Options.Applicative
 
 --------------------------------------------------------------------------------
 
 data Opts = Opts
-    { optDirPath :: FilePath
-    , optOutPath :: FilePath
-    , optWatch   :: Bool
-    , optVerbose :: Bool
+    { optDirPath     :: FilePath
+    , optOutPath     :: FilePath
+    , optFrontendUrl :: URL
+    , optWatch       :: Bool
+    , optVerbose     :: Bool
     }
 
 parseCmd :: IO Opts
@@ -35,6 +38,13 @@ pOpts =
                 <> value defaultOutputFile
                 <> help "Destination of the output HTML file"
                 )
+        <*> strOption
+                (  long "frontend"
+                <> metavar "FRONTEND_URL"
+                <> showDefault
+                <> value defaultFrontendUrl
+                <> help "URL of the frontend, the web WYSIWYG editor"
+                )
         <*> (not <$> switch
                 (long "no-watch" <> short 'n' <> help
                     "Only run Decks once, not updating on subsequent changes"
@@ -52,5 +62,8 @@ defaultInputDir = "."
 
 defaultOutputFile :: FilePath
 defaultOutputFile = "index.html"
+
+defaultFrontendUrl :: URL
+defaultFrontendUrl = "http://localhost:3000"
 
 --------------------------------------------------------------------------------
