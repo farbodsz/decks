@@ -1,7 +1,7 @@
 import React from "react";
-import { ContentPreview } from "../components/ContentPreview";
+import ContentPreview from "../components/ContentPreview";
 
-export function MainPage() {
+export default function MainPage() {
   return (
     <div>
       <h1>Decks Editor</h1>

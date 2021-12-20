@@ -1,4 +1,6 @@
 {
   "printWidth": 80,
-  "proseWrap": "always"
+  "proseWrap": "always",
+  "pluginSearchDirs": ["./web"],
+  "plugins": ["./web/node_modules/prettier-plugin-import-sort"]
 }
