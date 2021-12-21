@@ -17,7 +17,7 @@ export default class ContentPreview extends React.Component<
   ContentPreviewProps,
   ContentPreviewState
 > {
-  private contentDivRef = React.createRef<HTMLDivElement>();
+  private contentRef = React.createRef<HTMLDivElement>();
 
   constructor(props: ContentPreviewProps) {
     super(props);
@@ -37,7 +37,7 @@ export default class ContentPreview extends React.Component<
   }
 
   saveContent(event: React.MouseEvent<HTMLElement>) {
-    console.log(this.contentDivRef.current?.innerHTML);
+    console.log(this.contentRef.current?.innerHTML);
   }
 
   render() {
@@ -45,7 +45,9 @@ export default class ContentPreview extends React.Component<
       <div>
         <Button onClick={this.saveContent}>Save</Button>
         <div className={styles.container}>
-          <RevealJS>{ReactHtmlParser(this.state.contentHtml)}</RevealJS>
+          <RevealJS innerContentRef={this.contentRef}>
+            {ReactHtmlParser(this.state.contentHtml)}
+          </RevealJS>
         </div>
       </div>
     );

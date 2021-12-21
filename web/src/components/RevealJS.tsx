@@ -6,7 +6,10 @@ import Reveal from "reveal.js";
 
 export interface RevealJSProps {
   children: React.ReactNode;
+  innerContentRef: React.RefObject<HTMLDivElement>;
 }
+
+export interface RevealJSState {}
 
 export default function RevealJS(props: RevealJSProps) {
   React.useEffect(() => {
@@ -26,7 +29,9 @@ export default function RevealJS(props: RevealJSProps) {
       contentEditable
       suppressContentEditableWarning={true}
     >
-      <div className="slides">{props.children}</div>
+      <div ref={props.innerContentRef} className="slides">
+        {props.children}
+      </div>
     </div>
   );
 }
