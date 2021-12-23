@@ -1,4 +1,4 @@
-.PHONY: all build install
+.PHONY: all build install test
 
 all: install
 
@@ -7,3 +7,6 @@ build:
 
 install:
 	stack install
+
+test:
+	stack test
