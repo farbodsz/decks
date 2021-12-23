@@ -5,9 +5,9 @@
 module Decks.Compiler.CodeGen.Generate where
 
 import           Decks.Compiler.CodeGen.Types
-import           Decks.Compiler.Grammar
 import           Decks.Compiler.Error
-import Decks.Utils (Html)
+import           Decks.Compiler.Grammar
+import           Decks.Utils                    ( Html )
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
@@ -97,7 +97,8 @@ fillCtAttrs = attrsToHtml . processAttributes
     stylesToHtml :: [DecksAttr] -> HtmlResult
     stylesToHtml [] = Right ""
     stylesToHtml ps =
-        let kvTexts = T.unwords $ map (\(CssProp k v) -> k <> ":" <> v) ps
+        let kvTexts = T.unwords
+                $ map (\(CssProp k v) -> T.concat [k, ":", v, ";"]) ps
         in  Right $ "style=\"" <> kvTexts <> "\""
 
 --------------------------------------------------------------------------------
