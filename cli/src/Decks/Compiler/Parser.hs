@@ -90,11 +90,11 @@ pElement =
     attrList    = liftM2 (:) pAttr (many $ try (space1 *> pAttr))
 
 pAttr :: Parser DecksAttr
-pAttr = choice [pCssId, pCssClass, pCssProp]
+pAttr = choice [pCssId, pCssClass, pCssStyle]
   where
     pCssId    = CssId <$> (char '#' *> identChars)
     pCssClass = CssClass <$> (char '.' *> identChars)
-    pCssProp  = CssProp <$> (identChars <* char '=') <*> optQuoted valueChars
+    pCssStyle = CssStyle <$> (identChars <* char '=') <*> optQuoted valueChars
       where
         valueChars = fmap T.pack . some $ satisfy tokPred
         tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)

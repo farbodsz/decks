@@ -46,8 +46,8 @@ main = hspec $ do
                                   (Identifier "foo")
                                   [ CssClass "class"
                                   , CssId "id"
-                                  , CssProp "x"      "0"
-                                  , CssProp "y-prop" "test"
+                                  , CssStyle "x"      "0"
+                                  , CssStyle "y-prop" "test"
                                   ]
                                   []
         it "can include let inside" $ do
@@ -111,10 +111,11 @@ main = hspec $ do
             parse pAttr "" "#my-class" `shouldParse` CssId "my-class"
         it "can recognise class selectors" $ do
             parse pAttr "" ".my-class" `shouldParse` CssClass "my-class"
-        it "can recognise key-value properties" $ do
-            parse pAttr "" "height=25px" `shouldParse` CssProp "height" "25px"
-        it "can recognise key-value properties in quotes" $ do
-            parse pAttr "" "color=\"#FF0\"" `shouldParse` CssProp "color" "#FF0"
+        it "can recognise key-value styles" $ do
+            parse pAttr "" "height=25px" `shouldParse` CssStyle "height" "25px"
+        it "can recognise key-value styles in quotes" $ do
+            parse pAttr "" "color=\"#FF0\""
+                `shouldParse` CssStyle "color" "#FF0"
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do

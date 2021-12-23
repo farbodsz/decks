@@ -52,9 +52,9 @@ data DecksElement = DecksElement
 data DecksAttr
     = CssId Text              -- ^ E.g. @#identifier@
     | CssClass Text           -- ^ E.g. @.class-name@
-    | CssProp                 -- ^ E.g. @key="val"@
-        { cssPropKey :: Text
-        , cssPropVal :: Text
+    | CssStyle                -- ^ E.g. @key="val"@
+        { cssStyKey :: Text
+        , cssStyVal :: Text
         }
     deriving (Eq, Show)
 

@@ -75,8 +75,8 @@ fillCtAttrs = attrsToHtml . processAttributes
             isId _         = False
             isClass (CssClass _) = True
             isClass _            = False
-            isStyle (CssProp _ _) = True
-            isStyle _             = False
+            isStyle (CssStyle _ _) = True
+            isStyle _              = False
             process converter predicate = converter . filter predicate $ as
         in  HtmlAttributes { attrIdent   = process idsToHtml isId
                            , attrClasses = process classesToHtml isClass
@@ -97,8 +97,9 @@ fillCtAttrs = attrsToHtml . processAttributes
     stylesToHtml :: [DecksAttr] -> HtmlResult
     stylesToHtml [] = Right ""
     stylesToHtml ps =
-        let kvTexts = T.unwords
-                $ map (\(CssProp k v) -> T.concat [k, ":", v, ";"]) ps
+        let
+            kvTexts = T.unwords
+                $ map (\(CssStyle k v) -> T.concat [k, ":", v, ";"]) ps
         in  Right $ "style=\"" <> kvTexts <> "\""
 
 --------------------------------------------------------------------------------
