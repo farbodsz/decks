@@ -4,15 +4,16 @@
 }
 
 !def heading = { <h3 $attrs$>$content$</h3> }
+!let md = slide [data-markdown]
 
-slide { "Hello" }
-
-slide { 
-  heading {
-    "Another slide"
-  }
-
+md {
   [[
-  Hey there
+  ### Shopping list
+
+  - Apples
+  - Oranges 
+  - Dairy 
+    - Milk
+    - Cheese
   ]]
 }
