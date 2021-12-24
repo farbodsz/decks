@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import React from "react";
 import ReactHtmlParser from "react-html-parser";
 
@@ -7,7 +6,9 @@ import RevealJS from "./RevealJS";
 
 const BACKEND_URL = "http://localhost:8081/decks";
 
-interface ContentPreviewProps {}
+interface ContentPreviewProps {
+  contentRef: React.RefObject<HTMLDivElement>;
+}
 
 interface ContentPreviewState {
   contentHtml: string;
@@ -17,14 +18,11 @@ export default class ContentPreview extends React.Component<
   ContentPreviewProps,
   ContentPreviewState
 > {
-  private contentRef = React.createRef<HTMLDivElement>();
-
   constructor(props: ContentPreviewProps) {
     super(props);
     this.state = {
       contentHtml: "Loading...",
     };
-    this.saveContent = this.saveContent.bind(this);
   }
 
   componentDidMount() {
@@ -36,16 +34,11 @@ export default class ContentPreview extends React.Component<
       .catch((error) => console.error("Error " + error.message));
   }
 
-  saveContent(event: React.MouseEvent<HTMLElement>) {
-    console.log(this.contentRef.current?.innerHTML);
-  }
-
   render() {
     return (
       <div>
-        <Button onClick={this.saveContent}>Save</Button>
         <div className={styles.container}>
-          <RevealJS innerContentRef={this.contentRef}>
+          <RevealJS innerContentRef={this.props.contentRef}>
             {ReactHtmlParser(this.state.contentHtml)}
           </RevealJS>
         </div>
