@@ -5,6 +5,8 @@ import React from "react";
 import Reveal from "reveal.js";
 import Markdown from "reveal.js/plugin/markdown/markdown.esm.js";
 
+import styles from "./RevealJS.module.scss";
+
 export interface RevealJSProps {
   children: React.ReactNode;
   innerContentRef: React.RefObject<HTMLDivElement>;
@@ -45,12 +47,7 @@ export default function RevealJS(props: RevealJSProps) {
 
   return (
     <div
-      className="reveal"
-      style={{
-        height: "800px",
-        width: "800px",
-        margin: "auto",
-      }}
+      className={`reveal ${styles.container}`}
       contentEditable
       suppressContentEditableWarning={true}
     >
