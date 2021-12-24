@@ -56,6 +56,7 @@ data HtmlAttributes = HtmlAttributes
     { attrIdent   :: HtmlResult
     , attrClasses :: HtmlResult
     , attrStyles  :: HtmlResult
+    , attrAttrs   :: HtmlResult
     }
 
 -- | Returns the HTML attributes text corresponding to the Decks attributes,
@@ -67,7 +68,7 @@ fillCtAttrs = attrsToHtml . processAttributes
     attrsToHtml HtmlAttributes {..} =
         fmap (T.strip . T.unwords)
             . sequenceA
-            $ [attrIdent, attrClasses, attrStyles]
+            $ [attrIdent, attrClasses, attrStyles, attrAttrs]
 
     processAttributes :: [DecksAttr] -> HtmlAttributes
     processAttributes as =
@@ -77,11 +78,16 @@ fillCtAttrs = attrsToHtml . processAttributes
             isClass _            = False
             isStyle (CssStyle _ _) = True
             isStyle _              = False
+            isHtmlAttr (HtmlAttr _) = True
+            isHtmlAttr _            = False
             process converter predicate = converter . filter predicate $ as
-        in  HtmlAttributes { attrIdent   = process idsToHtml isId
-                           , attrClasses = process classesToHtml isClass
-                           , attrStyles  = process stylesToHtml isStyle
-                           }
+        in  HtmlAttributes
+                { attrIdent   = process idsToHtml isId
+                , attrClasses = process classesToHtml isClass
+                , attrStyles  = process stylesToHtml isStyle
+                , attrAttrs   = process (Right . T.unwords . map htmlAttrName)
+                                        isHtmlAttr
+                }
 
     idsToHtml :: [DecksAttr] -> HtmlResult
     idsToHtml []        = Right ""

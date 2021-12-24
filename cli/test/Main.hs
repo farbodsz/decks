@@ -41,13 +41,14 @@ main = hspec $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] []
         it "can parse multiple attributes" $ do
-            parse pElement "" "foo [ .class #id x=0 y-prop=\"test\" ]"
+            parse pElement "" "foo [ .class #id x=0 y-prop=\"test\" z ]"
                 `shouldParse` DecksElement
                                   (Identifier "foo")
                                   [ CssClass "class"
                                   , CssId "id"
                                   , CssStyle "x"      "0"
                                   , CssStyle "y-prop" "test"
+                                  , HtmlAttr "z"
                                   ]
                                   []
         it "can include let inside" $ do
@@ -116,6 +117,9 @@ main = hspec $ do
         it "can recognise key-value styles in quotes" $ do
             parse pAttr "" "color=\"#FF0\""
                 `shouldParse` CssStyle "color" "#FF0"
+        it "can recognise a standalone HTML attribute" $ do
+            parse pAttr "" "data-template"
+                `shouldParse` HtmlAttr "data-template"
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do

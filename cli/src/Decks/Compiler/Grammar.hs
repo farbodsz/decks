@@ -56,6 +56,9 @@ data DecksAttr
         { cssStyKey :: Text
         , cssStyVal :: Text
         }
+    | HtmlAttr                -- ^ E.g. @attr@
+        { htmlAttrName :: Text
+        }
     deriving (Eq, Show)
 
 --------------------------------------------------------------------------------

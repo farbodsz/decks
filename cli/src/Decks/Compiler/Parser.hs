@@ -90,14 +90,16 @@ pElement =
     attrList    = liftM2 (:) pAttr (many $ try (space1 *> pAttr))
 
 pAttr :: Parser DecksAttr
-pAttr = choice [pCssId, pCssClass, pCssStyle]
+pAttr = choice [pCssId, pCssClass, pCssStyle, pHtmlAttr]
   where
     pCssId    = CssId <$> (char '#' *> identChars)
     pCssClass = CssClass <$> (char '.' *> identChars)
-    pCssStyle = CssStyle <$> (identChars <* char '=') <*> optQuoted valueChars
-      where
-        valueChars = fmap T.pack . some $ satisfy tokPred
-        tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
+    pCssStyle =
+        let valueChars = fmap T.pack . some $ satisfy tokPred
+            tokPred =
+                liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
+        in  try $ CssStyle <$> identChars <*> (char '=' *> optQuoted valueChars)
+    pHtmlAttr = HtmlAttr <$> identChars
 
 pContentTemplate :: Parser ContentTemplate
 pContentTemplate =

@@ -44,6 +44,7 @@ instance AstShow DecksAttr where
     astShow _ (CssId    i  ) = ["CssId " <> i]
     astShow _ (CssClass c  ) = ["CssClass " <> c]
     astShow _ (CssStyle k v) = ["CssStyle " <> k <> " = " <> v]
+    astShow _ (HtmlAttr a  ) = ["HtmlAttr " <> a]
 
 instance AstShow ContentTemplate where
     astShow w (ContentTemplate ct) = treeFmt w "ContentTemplate " [ct]
