@@ -1,0 +1,19 @@
+name: Shell
+
+on:
+  push:
+    paths:
+      - ".github/workflows/shell.yml"
+      - "scripts/**"
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
