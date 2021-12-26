@@ -36,12 +36,10 @@ export default class ContentPreview extends React.Component<
 
   render() {
     return (
-      <div>
-        <div className={styles.container}>
-          <RevealJS innerContentRef={this.props.contentRef}>
-            {ReactHtmlParser(this.state.contentHtml)}
-          </RevealJS>
-        </div>
+      <div className={styles.container}>
+        <RevealJS innerContentRef={this.props.contentRef}>
+          {ReactHtmlParser(this.state.contentHtml)}
+        </RevealJS>
       </div>
     );
   }

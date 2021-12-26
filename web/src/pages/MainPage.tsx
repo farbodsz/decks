@@ -23,14 +23,14 @@ export default class MainPage extends React.Component<
 
   render() {
     return (
-      <div>
+      <>
         <DecksAppBar
           onSave={(event: React.MouseEvent<HTMLButtonElement>) => {
             console.log(this.contentRef.current?.innerHTML);
           }}
         />
         <ContentPreview contentRef={this.contentRef} />
-      </div>
+      </>
     );
   }
 }
