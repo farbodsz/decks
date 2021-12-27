@@ -1,13 +1,22 @@
 <html>
   <head>
+    <title>Decks Editor</title>
     <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css" />
     <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/white.css" />
+    <link rel="stylesheet" href="./editor.css" />
   </head>
   <body>
-    <div class="reveal">
-      <div class="slides">
-        <section>Slide 1</section>
-        <section>Slide 2</section>
+    <div class="editor">
+      <button id="button-edit" onclick="editorToggleEdit();">Edit</button>
+      <button onclick="editorSave();">Save</button>
+      <span id="status-mode" class="mode-text">Preview mode</span>
+    </div>
+    <div id="editor-content">
+      <div class="reveal">
+        <div class="slides">
+          <section>Slide 1</section>
+          <section>Slide 2</section>
+        </div>
       </div>
     </div>
     <script src="node_modules/reveal.js/dist/reveal.js"></script>

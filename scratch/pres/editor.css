@@ -1,0 +1,10 @@
+.reveal {
+  height: 90%;
+}
+
+.editor {
+  height: 5%;
+  width: 100%;
+  border: 1px solid black;
+  padding: 5px;
+}
