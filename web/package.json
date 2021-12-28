@@ -8,6 +8,7 @@
     "start": "yarn run build -- -w"
   },
   "dependencies": {
+    "http-server": "^14.0.0",
     "reveal.js": "^4.2.1"
   },
   "devDependencies": {
