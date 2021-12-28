@@ -1,2 +1,2 @@
 #!/bin/sh
-npx http-server -c-1 -o --cors --port 3000
+npx http-server -c-1 -o --cors -a "localhost" --port 3000
