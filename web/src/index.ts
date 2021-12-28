@@ -1,9 +1,25 @@
+//------------------------------------------------------------------------------
+// Variables and init
+//------------------------------------------------------------------------------
+
 const BACKEND_URL = "http://localhost:8081/decks";
 
 /**
  * Editing mode
  */
 let editorEditable = false;
+
+/**
+ * Initializes the Decks UI
+ */
+function initDecks() {
+  revealInit();
+  editorLoadContent();
+}
+
+//------------------------------------------------------------------------------
+// Reveal helpers
+//------------------------------------------------------------------------------
 
 function revealInit() {
   Reveal.initialize({
@@ -21,6 +37,10 @@ function revealRefresh(currSlide: { h: number; v: number }) {
   Reveal.sync();
   Reveal.slide(currSlide.h, currSlide.v);
 }
+
+//------------------------------------------------------------------------------
+// Decks editor
+//------------------------------------------------------------------------------
 
 /**
  * Replaces the HTML presentation with the one loaded from the backend.
@@ -49,13 +69,13 @@ function editorLoadContent() {
  * this.
  */
 function editorToggleEdit() {
-  editorEditable = !editorEditable;
-
-  document
-    .querySelectorAll("section")
-    .forEach((el) =>
-      el.setAttribute("contentEditable", editorEditable ? "true" : "false")
-    );
+  if (editorEditable) {
+    document
+      .querySelector("#editor-content")!
+      .setAttribute("contentEditable", "false");
+  } else {
+    editorSetupEditClicks();
+  }
 
   const editButton = document.getElementById("button-edit");
   if (editButton) editButton.textContent = editorEditable ? "Lock" : "Edit";
@@ -66,6 +86,32 @@ function editorToggleEdit() {
 }
 
 /**
+ * Adds onclick events for all elements, to make them editable on click.
+ */
+function editorSetupEditClicks() {
+  console.log("Setting up clicks");
+  const statusTxt = document.getElementById("status-mode")!;
+
+  const container = document.querySelector("#editor-content")!;
+  const elements: NodeListOf<HTMLElement> =
+    container.querySelectorAll("section > *");
+
+  elements.forEach((el: HTMLElement) => {
+    el.onclick = function () {
+      el.setAttribute("contentEditable", "true");
+      statusTxt.textContent = "Editing mode";
+      editorEditable = true;
+    };
+
+    el.onblur = function () {
+      el.setAttribute("contentEditable", "false");
+      statusTxt.textContent = "Previewing mode";
+      editorEditable = false;
+    };
+  });
+}
+
+/**
  * Outputs the presentation HTML
  */
 function editorSave() {
@@ -73,4 +119,8 @@ function editorSave() {
   console.log(content);
 }
 
-revealInit();
+//------------------------------------------------------------------------------
+// Main
+//------------------------------------------------------------------------------
+
+initDecks();
