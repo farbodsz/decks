@@ -60,29 +60,9 @@ function editorLoadContent() {
 
       contentContainer.innerHTML = data;
       revealRefresh(currSlide);
+      editorSetupEditClicks();
     })
     .catch((error) => console.error("Error " + error.message));
-}
-
-/**
- * Toggles the editing mode (edit/preview) and updates UI elements reflecting
- * this.
- */
-function editorToggleEdit() {
-  if (editorEditable) {
-    document
-      .querySelector("#editor-content")!
-      .setAttribute("contentEditable", "false");
-  } else {
-    editorSetupEditClicks();
-  }
-
-  const editButton = document.getElementById("button-edit");
-  if (editButton) editButton.textContent = editorEditable ? "Lock" : "Edit";
-
-  const statusTxt = document.getElementById("status-mode");
-  if (statusTxt)
-    statusTxt.textContent = editorEditable ? "Editing mode" : "Previewing mode";
 }
 
 /**
@@ -90,8 +70,6 @@ function editorToggleEdit() {
  */
 function editorSetupEditClicks() {
   console.log("Setting up clicks");
-  const statusTxt = document.getElementById("status-mode")!;
-
   const container = document.querySelector("#editor-content")!;
   const elements: NodeListOf<HTMLElement> =
     container.querySelectorAll("section > *");
@@ -99,16 +77,20 @@ function editorSetupEditClicks() {
   elements.forEach((el: HTMLElement) => {
     el.onclick = function () {
       el.setAttribute("contentEditable", "true");
-      statusTxt.textContent = "Editing mode";
-      editorEditable = true;
+      editorUpdateMode(true);
     };
 
     el.onblur = function () {
       el.setAttribute("contentEditable", "false");
-      statusTxt.textContent = "Previewing mode";
-      editorEditable = false;
+      editorUpdateMode(false);
     };
   });
+}
+
+function editorUpdateMode(editable: boolean) {
+  editorEditable = editable;
+  const statusTxt = document.getElementById("status-mode")!;
+  statusTxt.textContent = editable ? "Editing mode" : "Previewing mode";
 }
 
 /**
