@@ -5,21 +5,27 @@
     <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/white.css" />
     <link rel="stylesheet" href="./editor.css" />
   </head>
+
   <body>
+    <!-- Editor view -->
     <div class="editor">
+      <button onclick="editorLoadContent();">Load</button>
       <button id="button-edit" onclick="editorToggleEdit();">Edit</button>
       <button onclick="editorSave();">Save</button>
       <span id="status-mode" class="mode-text">Preview mode</span>
     </div>
-    <div id="editor-content">
-      <div class="reveal">
-        <div class="slides">
-          <section>Slide 1</section>
-          <section>Slide 2</section>
-        </div>
+
+    <!-- Presentation content -->
+    <div class="reveal">
+      <div id="editor-content" class="slides">
+        <section>Click Load to load content from Decks</section>
       </div>
     </div>
+
+    <!-- Reveal -->
     <script src="node_modules/reveal.js/dist/reveal.js"></script>
+
+    <!-- Editor script -->
     <script src="dist/index.js"></script>
   </body>
 </html>
