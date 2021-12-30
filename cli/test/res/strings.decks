@@ -1,0 +1,11 @@
+!def slide = {
+  <section $attrs$>$content$</section>
+}
+
+slide { "Single line" }
+slide { 
+  [[
+  Multi-
+    line
+  ]]
+}

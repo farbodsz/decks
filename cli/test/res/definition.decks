@@ -1,0 +1,5 @@
+!def slide = {
+  <section $attrs$>$content$</section>
+}
+
+slide

@@ -27,6 +27,7 @@ type Parser = Parsec Void Text
 
 --------------------------------------------------------------------------------
 
+-- TODO: avoid IO here?
 parseDecks :: FilePath -> Bool -> IO (Maybe DecksProgram)
 parseDecks path verbose = do
     contents <- T.pack <$> readFile path

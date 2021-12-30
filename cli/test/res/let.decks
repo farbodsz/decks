@@ -1,0 +1,10 @@
+!def slide = {
+  <section $attrs$>$content$</section>
+}
+!def heading = { <h3 $attrs$>$content$</h3> }
+
+!let blueSlide = slide [color="blue"]
+
+blueSlide {
+  heading { "This is a blue slide." }
+}

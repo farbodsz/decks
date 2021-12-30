@@ -11,6 +11,7 @@ import           Data.Text                      ( Text )
 
 -- | The Parse Syntax Tree for the Decks program.
 newtype DecksProgram = DecksProgram [DecksStmt]
+    deriving Show
 
 -- | Identifies a drawable element.
 newtype Identifier = Identifier { unIdentifier :: Text }
