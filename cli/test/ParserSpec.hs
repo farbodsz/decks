@@ -45,14 +45,15 @@ testUnits = describe "unit tests" $ do
     describe "pElement" $ do
         it "can parse simple element" $ do
             parse pElement "" "foo [.my-class] { \"bar\" }"
-                `shouldParse` DecksElement { elIdent = Identifier "foo"
-                                           , elAttrs = [CssClass "my-class"]
-                                           , elStmts = [DecksLiteral "bar"]
-                                           }
+                `shouldParse` DecksElement
+                                  { elIdent = Identifier "foo"
+                                  , elProps = [ElemPropClass "my-class"]
+                                  , elStmts = [DecksLiteral "bar"]
+                                  }
         it "has optional attrs" $ do
             parse pElement "" "foo { \"bar\" }" `shouldParse` DecksElement
                 { elIdent = Identifier "foo"
-                , elAttrs = []
+                , elProps = []
                 , elStmts = [DecksLiteral "bar"]
                 }
         it "has optional attrs and content" $ do
@@ -62,11 +63,11 @@ testUnits = describe "unit tests" $ do
             parse pElement "" "foo [ .class #id x=0 y-prop=\"test\" z ]"
                 `shouldParse` DecksElement
                                   (Identifier "foo")
-                                  [ CssClass "class"
-                                  , CssId "id"
-                                  , CssStyle "x"      "0"
-                                  , CssStyle "y-prop" "test"
-                                  , HtmlAttr "z"
+                                  [ ElemPropClass "class"
+                                  , ElemPropId "id"
+                                  , ElemPropStyle "x"      "0"
+                                  , ElemPropStyle "y-prop" "test"
+                                  , ElemPropAttr "z"
                                   ]
                                   []
         it "can include let inside" $ do
@@ -85,7 +86,7 @@ testUnits = describe "unit tests" $ do
                     { letIdent = Identifier "bar"
                     , letElem  = DecksElement
                                      { elIdent = Identifier "oof"
-                                     , elAttrs = [CssClass "custom-class"]
+                                     , elProps = [ElemPropClass "custom-class"]
                                      , elStmts = [DecksLiteral "default"]
                                      }
                     }
@@ -125,19 +126,20 @@ testUnits = describe "unit tests" $ do
             let str = "\"  foo bar\"  "
             parse pLiteral "" str `shouldParse` DecksLiteral "foo bar"
 
-    describe "pAttr" $ do
-        it "can recognise id selectors" $ do
-            parse pAttr "" "#my-class" `shouldParse` CssId "my-class"
-        it "can recognise class selectors" $ do
-            parse pAttr "" ".my-class" `shouldParse` CssClass "my-class"
-        it "can recognise key-value styles" $ do
-            parse pAttr "" "height=25px" `shouldParse` CssStyle "height" "25px"
-        it "can recognise key-value styles in quotes" $ do
-            parse pAttr "" "color=\"#FF0\""
-                `shouldParse` CssStyle "color" "#FF0"
+    describe "pProp" $ do
+        it "can recognise HTML id property" $ do
+            parse pProp "" "#my-class" `shouldParse` ElemPropId "my-class"
+        it "can recognise class property" $ do
+            parse pProp "" ".my-class" `shouldParse` ElemPropClass "my-class"
+        it "can recognise style property" $ do
+            parse pProp "" "height=25px"
+                `shouldParse` ElemPropStyle "height" "25px"
+        it "can recognise style with values in quotes" $ do
+            parse pProp "" "color=\"#FF0\""
+                `shouldParse` ElemPropStyle "color" "#FF0"
         it "can recognise a standalone HTML attribute" $ do
-            parse pAttr "" "data-template"
-                `shouldParse` HtmlAttr "data-template"
+            parse pProp "" "data-template"
+                `shouldParse` ElemPropAttr "data-template"
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do
@@ -156,7 +158,7 @@ testUnits = describe "unit tests" $ do
                 `shouldParse` DecksDrawStmt
                                   (DecksElement
                                       { elIdent = Identifier "bar"
-                                      , elAttrs = [CssClass "my-class"]
+                                      , elProps = [ElemPropClass "my-class"]
                                       , elStmts = [DecksLiteral "content"]
                                       }
                                   )
@@ -168,7 +170,7 @@ testUnits = describe "unit tests" $ do
                                   (Identifier "foo")
                                   (DecksElement
                                       { elIdent = Identifier "bar"
-                                      , elAttrs = [CssClass "my-class"]
+                                      , elProps = [ElemPropClass "my-class"]
                                       , elStmts = [DecksLiteral "content"]
                                       }
                                   )
@@ -195,7 +197,7 @@ testUnits = describe "unit tests" $ do
             parse pStmt "" "!let foo=bar [.my-class]" `shouldParse` DecksLetStmt
                 (Identifier "foo")
                 DecksElement { elIdent = Identifier "bar"
-                             , elAttrs = [CssClass "my-class"]
+                             , elProps = [ElemPropClass "my-class"]
                              , elStmts = []
                              }
 

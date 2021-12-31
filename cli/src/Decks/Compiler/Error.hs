@@ -15,7 +15,7 @@ data CodeGenError
     = UndefinedIdentifier Identifier
     | MultipleDefinitions Identifier
     | EmptyContent
-    | MultipleCssIds
+    | MultipleElemPropIds
     | InternalError Text
     deriving Eq
 
@@ -25,7 +25,7 @@ showCodeGenErr (UndefinedIdentifier i) =
 showCodeGenErr (MultipleDefinitions i) =
     T.concat ["Identifier '", unIdentifier i, "' already defined."]
 showCodeGenErr EmptyContent        = "Element content cannot be empty"
-showCodeGenErr MultipleCssIds      = "HTML ID attributes must be unique"
+showCodeGenErr MultipleElemPropIds = "HTML ID attributes must be unique"
 showCodeGenErr (InternalError msg) = "Internal error: " <> msg
 
 --------------------------------------------------------------------------------

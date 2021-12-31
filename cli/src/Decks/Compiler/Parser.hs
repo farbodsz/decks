@@ -82,25 +82,27 @@ pElement :: Parser DecksElement
 pElement =
     DecksElement
         <$> (pIdentifier <* space)
-        <*> (fromMaybe [] <$> optional attrSection <* space)
+        <*> (fromMaybe [] <$> optional propsSection <* space)
         <*> (fromMaybe [] <$> optional (braced (some pStmt)))
   where
-    attrSection = char '[' *> space *> attrList <* space <* char ']' <* space
-    -- Space following an attribute needs lookahead and backtracking with 'try'
-    -- since FOLLOW could be either ']' or another attribute.
-    attrList    = liftM2 (:) pAttr (many $ try (space1 *> pAttr))
+    propsSection = char '[' *> space *> propList <* space <* char ']' <* space
+    -- Space following a prop needs lookahead and backtracking with 'try' since
+    -- FOLLOW could be either ']' or another attribute.
+    propList     = liftM2 (:) pProp (many $ try (space1 *> pProp))
 
-pAttr :: Parser DecksAttr
-pAttr = choice [pCssId, pCssClass, pCssStyle, pHtmlAttr]
+pProp :: Parser DecksElemProp
+pProp = choice [pId, pClass, pStyle, pAttr]
   where
-    pCssId    = CssId <$> (char '#' *> identChars)
-    pCssClass = CssClass <$> (char '.' *> identChars)
-    pCssStyle =
+    pId    = ElemPropId <$> (char '#' *> identChars)
+    pClass = ElemPropClass <$> (char '.' *> identChars)
+    pStyle =
         let valueChars = fmap T.pack . some $ satisfy tokPred
             tokPred =
                 liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
-        in  try $ CssStyle <$> identChars <*> (char '=' *> optQuoted valueChars)
-    pHtmlAttr = HtmlAttr <$> identChars
+        in  try $ liftM2 ElemPropStyle
+                         identChars
+                         (char '=' *> optQuoted valueChars)
+    pAttr = ElemPropAttr <$> identChars
 
 pContentTemplate :: Parser ContentTemplate
 pContentTemplate =

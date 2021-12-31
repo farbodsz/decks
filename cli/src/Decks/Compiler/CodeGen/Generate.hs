@@ -35,7 +35,7 @@ genStmt (DecksLetStmt i DecksElement {..}) = do
     pct     <- getIdentPct elIdent
     content <- genStmts elStmts
     withStateT
-        (markUsage elIdent . insertLet ident (updatePct pct elAttrs content))
+        (markUsage elIdent . insertLet ident (updatePct pct elProps content))
         (pure mempty)
 genStmt (DecksLiteral txt) = pure txt
 genStmt (DecksComment _  ) = pure mempty
@@ -44,14 +44,16 @@ genElement :: DecksElement -> DecksM Html
 genElement DecksElement {..} = do
     pct     <- getIdentPct elIdent
     content <- genStmts elStmts
-    lift $ fillContentTemplate $ updatePct pct elAttrs content
+    lift $ fillContentTemplate $ updatePct pct elProps content
 
 -- | Returns the HTML representing a filled-in content template.
 fillContentTemplate :: PendingContentTemplate -> HtmlResult
-fillContentTemplate (PendingContentTemplate (ContentTemplate ct) as ctnt) = do
-    attrs <- fillCtAttrs as
-    pure . T.replace "$attrs$" attrs . T.replace "$content$" ctnt $ ct
+fillContentTemplate (PendingContentTemplate (ContentTemplate ct) ps ctnt) = do
+    props <- fillCtProps ps
+    pure . T.replace "$attrs$" props . T.replace "$content$" ctnt $ ct
 
+-- | Attributes in HTML, corresponding to the properties set on the Decks
+-- element.
 data HtmlAttributes = HtmlAttributes
     { attrIdent   :: HtmlResult
     , attrClasses :: HtmlResult
@@ -59,10 +61,10 @@ data HtmlAttributes = HtmlAttributes
     , attrAttrs   :: HtmlResult
     }
 
--- | Returns the HTML attributes text corresponding to the Decks attributes,
--- i.e. HTML @id@, @class@, and @style@ attributes.
-fillCtAttrs :: [DecksAttr] -> HtmlResult
-fillCtAttrs = attrsToHtml . processAttributes
+-- | Returns the HTML attributes text corresponding to the properties on the
+-- Decks element.
+fillCtProps :: [DecksElemProp] -> HtmlResult
+fillCtProps = attrsToHtml . processProps
   where
     attrsToHtml :: HtmlAttributes -> HtmlResult
     attrsToHtml HtmlAttributes {..} =
@@ -70,42 +72,42 @@ fillCtAttrs = attrsToHtml . processAttributes
             . sequenceA
             $ [attrIdent, attrClasses, attrStyles, attrAttrs]
 
-    processAttributes :: [DecksAttr] -> HtmlAttributes
-    processAttributes as =
-        let isId (CssId _) = True
-            isId _         = False
-            isClass (CssClass _) = True
-            isClass _            = False
-            isStyle (CssStyle _ _) = True
-            isStyle _              = False
-            isHtmlAttr (HtmlAttr _) = True
-            isHtmlAttr _            = False
-            process converter predicate = converter . filter predicate $ as
+    processProps :: [DecksElemProp] -> HtmlAttributes
+    processProps ps =
+        let isId (ElemPropId _) = True
+            isId _              = False
+            isClass (ElemPropClass _) = True
+            isClass _                 = False
+            isStyle (ElemPropStyle _ _) = True
+            isStyle _                   = False
+            isAttr (ElemPropAttr _) = True
+            isAttr _                = False
+            process converter predicate = converter . filter predicate $ ps
         in  HtmlAttributes
                 { attrIdent   = process idsToHtml isId
                 , attrClasses = process classesToHtml isClass
                 , attrStyles  = process stylesToHtml isStyle
-                , attrAttrs   = process (Right . T.unwords . map htmlAttrName)
-                                        isHtmlAttr
+                , attrAttrs   = process (Right . T.unwords . map propAttrName)
+                                        isAttr
                 }
 
-    idsToHtml :: [DecksAttr] -> HtmlResult
-    idsToHtml []        = Right ""
-    idsToHtml [CssId i] = Right $ "id=\"" <> i <> "\""
-    idsToHtml _         = Left MultipleCssIds
+    idsToHtml :: [DecksElemProp] -> HtmlResult
+    idsToHtml []             = Right ""
+    idsToHtml [ElemPropId i] = Right $ "id=\"" <> i <> "\""
+    idsToHtml _              = Left MultipleElemPropIds
 
-    classesToHtml :: [DecksAttr] -> HtmlResult
+    classesToHtml :: [DecksElemProp] -> HtmlResult
     classesToHtml [] = Right ""
     classesToHtml cs =
-        let clsNames = T.unwords $ map (\(CssClass name) -> "." <> name) cs
+        let clsNames =
+                T.unwords $ map (\(ElemPropClass name) -> "." <> name) cs
         in  Right $ "class=\"" <> clsNames <> "\""
 
-    stylesToHtml :: [DecksAttr] -> HtmlResult
+    stylesToHtml :: [DecksElemProp] -> HtmlResult
     stylesToHtml [] = Right ""
     stylesToHtml ps =
-        let
-            kvTexts = T.unwords
-                $ map (\(CssStyle k v) -> T.concat [k, ":", v, ";"]) ps
+        let kvTexts = T.unwords
+                $ map (\(ElemPropStyle k v) -> T.concat [k, ":", v, ";"]) ps
         in  Right $ "style=\"" <> kvTexts <> "\""
 
 --------------------------------------------------------------------------------

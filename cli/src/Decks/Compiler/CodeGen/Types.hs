@@ -19,8 +19,8 @@ import           Data.Maybe
 
 type HtmlResult = Either CodeGenError Html
 
--- | Represents a content template with some default HTML attributes, used for
--- let bindings, awaiting conversion to a HTML result.
+-- | Represents a content template with some default properties, used for let
+-- bindings, awaiting conversion to HTML.
 --
 -- Let bindings essentially bind an identifier to an existing definition,
 -- possibly with some attributes set. For example, in the following Decks
@@ -34,25 +34,25 @@ type HtmlResult = Either CodeGenError Html
 -- @
 --
 -- The initial attributes cannot be stored as HTML, its final stage, since they
--- can still be overridden (L4 of example), hence @DecksAttr@ from the grammar
--- is used.
+-- can still be overridden (L4 of example), hence @DecksElemProp@ from the
+-- grammar is used.
 --
 data PendingContentTemplate = PendingContentTemplate
     { pctTemplate :: ContentTemplate
-    -- ^ The template text with template strings like @$content$@..
-    , pctAttrs    :: [DecksAttr]
-    -- ^ Attributes waiting to be applied to the template.
+    -- ^ The template text with template strings like @$content$@.
+    , pctProps    :: [DecksElemProp]
+    -- ^ Decks properties waiting to be applied to the template.
     , pctContent  :: Html
     -- ^ Content to be applied to the template.
     }
 
 updatePct
     :: PendingContentTemplate     -- ^ Initial 'PendingContentTemplate'.
-    -> [DecksAttr]                -- ^ Attributes overriding the initial ones.
+    -> [DecksElemProp]            -- ^ Props overriding the initial ones.
     -> Html                       -- ^ Content overriding the initial one.
     -> PendingContentTemplate     -- ^ Resulting 'PendingContentTemplate'.
-updatePct PendingContentTemplate {..} as =
-    PendingContentTemplate pctTemplate (as `union` pctAttrs)
+updatePct PendingContentTemplate {..} ps =
+    PendingContentTemplate pctTemplate (ps `union` pctProps)
 
 -- | The (pending) content represented by each identifier.
 type VariableMap = M.HashMap Identifier PendingContentTemplate

@@ -43,22 +43,25 @@ newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }
 -- | A drawable element statement.
 data DecksElement = DecksElement
     { elIdent :: Identifier
-    , elAttrs :: [DecksAttr]
+    , elProps :: [DecksElemProp]
     , elStmts :: [DecksStmt]
     }
     deriving (Eq, Show)
 
--- | Elements can have attributes attached to them, referring to external CSS
--- code.
-data DecksAttr
-    = CssId Text              -- ^ E.g. @#identifier@
-    | CssClass Text           -- ^ E.g. @.class-name@
-    | CssStyle                -- ^ E.g. @key="val"@
-        { cssStyKey :: Text
-        , cssStyVal :: Text
+-- | Decks elements can have attributes attached to them.
+--
+-- While these can be generated into HTML, Decks attributes have different
+-- syntax to HTML attributes, so they should not be confused.
+--
+data DecksElemProp
+    = ElemPropId Text               -- ^ Decks syntax: @#identifier@
+    | ElemPropClass Text            -- ^ Decks syntax: @.class-name@
+    | ElemPropStyle                 -- ^ Decks syntax: @key="val"@
+        { propStyKey :: Text
+        , propStyVal :: Text
         }
-    | HtmlAttr                -- ^ E.g. @attr@
-        { htmlAttrName :: Text
+    | ElemPropAttr                  -- ^ Decks syntax: @attr@
+        { propAttrName :: Text
         }
     deriving (Eq, Show)
 

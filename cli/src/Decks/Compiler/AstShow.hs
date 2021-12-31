@@ -34,17 +34,17 @@ instance AstShow DecksStmt where
 
 instance AstShow DecksElement where
     astShow w (DecksElement i as stmts) = treeFmt w "Element"
-        $ concat [identTxt, attrsTxt, contTxt]
+        $ concat [identTxt, propsTxt, contTxt]
       where
         identTxt = astShow w i
-        attrsTxt = concatMap (astShow w) as
+        propsTxt = concatMap (astShow w) as
         contTxt  = concatMap (astShow w) stmts
 
-instance AstShow DecksAttr where
-    astShow _ (CssId    i  ) = ["CssId " <> i]
-    astShow _ (CssClass c  ) = ["CssClass " <> c]
-    astShow _ (CssStyle k v) = ["CssStyle " <> k <> " = " <> v]
-    astShow _ (HtmlAttr a  ) = ["HtmlAttr " <> a]
+instance AstShow DecksElemProp where
+    astShow _ (ElemPropId    i  ) = ["ElemPropId " <> i]
+    astShow _ (ElemPropClass c  ) = ["ElemPropClass " <> c]
+    astShow _ (ElemPropStyle k v) = ["ElemPropStyle " <> k <> " = " <> v]
+    astShow _ (ElemPropAttr a   ) = ["ElemPropAttr " <> a]
 
 instance AstShow ContentTemplate where
     astShow w (ContentTemplate ct) = treeFmt w "ContentTemplate " [ct]
