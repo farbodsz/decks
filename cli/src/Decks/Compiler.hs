@@ -9,6 +9,7 @@ import           Decks.Compiler.Parser          ( parseDecks )
 
 --------------------------------------------------------------------------------
 
+-- TODO: not in IO monad?
 compile :: FilePath -> Bool -> FilePath -> IO ()
 compile outPath verbose file = parseDecks file verbose >>= \case
     Nothing  -> pure ()

@@ -15,6 +15,7 @@ dependencies:
   - ansi-terminal
   - async
   - directory
+  - extra
   - filepath
   - fsnotify
   - hashable

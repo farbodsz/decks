@@ -19,7 +19,7 @@ spec = describe "parser" $ testFiles >> testUnits
 
 testFiles :: Spec
 testFiles = describe "test files" $ do
-    let resDir = "test/res/"
+    let resDir = "test/res/input/"
     fileNames <-
         runIO $ filter (`notElem` [".", ".."]) <$> getDirectoryContents resDir
 

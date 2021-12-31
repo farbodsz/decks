@@ -27,7 +27,8 @@ type Parser = Parsec Void Text
 
 --------------------------------------------------------------------------------
 
--- TODO: avoid IO here?
+-- TODO: avoid IO here - return Either type so we can compose easily with
+-- runCodeGen?
 parseDecks :: FilePath -> Bool -> IO (Maybe DecksProgram)
 parseDecks path verbose = do
     contents <- T.pack <$> readFile path
