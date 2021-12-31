@@ -56,7 +56,7 @@ testUnits = describe "unit tests" $ do
                 , elProps = []
                 , elStmts = [DecksLiteral "bar"]
                 }
-        it "has optional attrs and content" $ do
+        it "has optional props and content" $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") [] []
         it "can parse multiple attributes" $ do
@@ -143,14 +143,14 @@ testUnits = describe "unit tests" $ do
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do
-            let ct = "<h1 $attrs$>$content$</h1>"
+            let ct = "<h1 $props$>$content$</h1>"
             parse pContentTemplate "" ct `shouldParse` ContentTemplate ct
         it "requires an attribute template string" $ do
             parse pContentTemplate ""
                 `shouldFailOn` "<h1 $not an attr$>$content$</h1>"
         it "requires a content template string" $ do
             parse pContentTemplate ""
-                `shouldFailOn` "<h1 $attrs$>$not a content$</h1>"
+                `shouldFailOn` "<h1 $props$>$not a content$</h1>"
 
     describe "pDrawStmt" $ do
         it "ignores extra whitespaces" $ do
@@ -177,7 +177,7 @@ testUnits = describe "unit tests" $ do
 
     describe "pDefineStmt" $ do
         it "recognises a simple definition" $ do
-            let ct = "<h1 $attrs$>$content$</h1>"
+            let ct = "<h1 $props$>$content$</h1>"
             parse pDefStmt "" ("!def h1 = {" <> ct <> "}")
                 `shouldParse` DecksDefStmt
                                   (Identifier "h1")

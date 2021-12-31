@@ -27,7 +27,7 @@ type HtmlResult = Either CodeGenError Html
 -- program, example refers to a type of text with certain attributes and
 -- content:
 -- @
--- !def text = { <p $attrs$>$content$</p> }
+-- !def text = { <p $props$>$content$</p> }
 -- !let example = text [.my-class] { Hello World! }
 -- example
 -- example [.overridden-style] { Overridden content }

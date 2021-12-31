@@ -1,5 +1,5 @@
 !def slide = {
-  <section $attrs$>$content$</section>
+  <section $props$>$content$</section>
 }
 
 slide
