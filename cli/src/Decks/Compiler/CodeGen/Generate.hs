@@ -50,7 +50,10 @@ genElement DecksElement {..} = do
 fillContentTemplate :: PendingContentTemplate -> HtmlResult
 fillContentTemplate (PendingContentTemplate (ContentTemplate ct) ps ctnt) = do
     props <- fillCtProps ps
-    pure . T.replace "$props$" props . T.replace "$content$" ctnt $ ct
+    pure
+        . T.replace " $props$" (T.stripEnd $ " " <> props)
+        . T.replace "$content$" ctnt
+        $ ct
 
 -- | Attributes in HTML, corresponding to the properties set on the Decks
 -- element.
