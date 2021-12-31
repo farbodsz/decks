@@ -3,9 +3,9 @@
 }
 
 slide { "Single line" }
-slide { 
+slide {
   [[
-  Multi-
-    line
+Multi-
+  line
   ]]
 }

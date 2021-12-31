@@ -19,7 +19,7 @@ import qualified Data.Text                     as T
 
 -- | Returns either successfully generated HTML from the Decks AST, or an error.
 genProgram :: DecksProgram -> DecksM Html
-genProgram (DecksProgram stmts) = genStmts stmts
+genProgram (DecksProgram stmts) = genStmts stmts <&> (<> "\n")
 
 genStmts :: [DecksStmt] -> DecksM Html
 genStmts stmts = mapM genStmt stmts <&> T.concat
@@ -51,6 +51,7 @@ fillContentTemplate :: PendingContentTemplate -> HtmlResult
 fillContentTemplate (PendingContentTemplate (ContentTemplate ct) ps ctnt) = do
     props <- fillCtProps ps
     pure
+        . T.strip
         . T.replace " $props$" (T.stripEnd $ " " <> props)
         . T.replace "$content$" ctnt
         $ ct

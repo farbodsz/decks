@@ -6,11 +6,7 @@
 
 slide {
   heading { "Heading" }
-
   txt {
-    [[
-    Some multi-
-      line text.
-    ]]
+    "Text."
   }
 }
