@@ -12,7 +12,6 @@ import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
 import qualified Data.HashMap.Lazy             as M
-import           Data.List                      ( union )
 import           Data.Maybe
 
 --------------------------------------------------------------------------------
@@ -40,7 +39,7 @@ type HtmlResult = Either CodeGenError Html
 data PendingContentTemplate = PendingContentTemplate
     { pctTemplate :: ContentTemplate
     -- ^ The template text with template strings like @$content$@.
-    , pctProps    :: [DecksElemProp]
+    , pctProps    :: DecksElemProps
     -- ^ Decks properties waiting to be applied to the template.
     , pctContent  :: Html
     -- ^ Content to be applied to the template.
@@ -48,11 +47,11 @@ data PendingContentTemplate = PendingContentTemplate
 
 updatePct
     :: PendingContentTemplate     -- ^ Initial 'PendingContentTemplate'.
-    -> [DecksElemProp]            -- ^ Props overriding the initial ones.
+    -> DecksElemProps             -- ^ Props overriding the initial ones.
     -> Html                       -- ^ Content overriding the initial one.
     -> PendingContentTemplate     -- ^ Resulting 'PendingContentTemplate'.
 updatePct PendingContentTemplate {..} ps =
-    PendingContentTemplate pctTemplate (ps `union` pctProps)
+    PendingContentTemplate pctTemplate (pctProps <> ps)
 
 -- | The (pending) content represented by each identifier.
 type VariableMap = M.HashMap Identifier PendingContentTemplate
@@ -73,7 +72,7 @@ insertDef :: Identifier -> ContentTemplate -> DecksStore -> DecksStore
 insertDef i ct DecksStore {..} = DecksStore (M.insert i pct stDefs)
                                             stLets
                                             (M.insert i 0 stUsages)
-    where pct = PendingContentTemplate ct [] mempty
+    where pct = PendingContentTemplate ct mempty mempty
 
 insertLet :: Identifier -> PendingContentTemplate -> DecksStore -> DecksStore
 insertLet i t DecksStore {..} =

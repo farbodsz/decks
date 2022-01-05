@@ -83,27 +83,24 @@ pElement :: Parser DecksElement
 pElement =
     DecksElement
         <$> (pIdentifier <* space)
-        <*> (fromMaybe [] <$> optional propsSection <* space)
+        <*> (fromMaybe mempty <$> optional (bracketed pProps <* space) <* space)
         <*> (fromMaybe [] <$> optional (braced (some pStmt)))
-  where
-    propsSection = char '[' *> space *> propList <* space <* char ']' <* space
-    -- Space following a prop needs lookahead and backtracking with 'try' since
-    -- FOLLOW could be either ']' or another attribute.
-    propList     = liftM2 (:) pProp (many $ try (space1 *> pProp))
 
-pProp :: Parser DecksElemProp
-pProp = choice [pId, pClass, pStyle, pAttr]
+pProps :: Parser DecksElemProps
+pProps =
+    DecksElemProps
+        <$> (optional pId <* space)
+        <*> many (pClass <* space)
+        <*> many (pStyle <* space)
+        <*> many (pAttr <* space)
   where
-    pId    = ElemPropId <$> (char '#' *> identChars)
-    pClass = ElemPropClass <$> (char '.' *> identChars)
-    pStyle =
-        let valueChars = fmap T.pack . some $ satisfy tokPred
-            tokPred =
-                liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
-        in  try $ liftM2 ElemPropStyle
-                         identChars
-                         (char '=' *> optQuoted valueChars)
-    pAttr = ElemPropAttr <$> identChars
+    pId    = char '#' *> identChars
+    pClass = char '.' *> identChars
+    pStyle = try $ liftM2 (,) (identChars <* char '=') (optQuoted valueChars)
+      where
+        valueChars = fmap T.pack . some $ satisfy tokPred
+        tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
+    pAttr = identChars
 
 pContentTemplate :: Parser ContentTemplate
 pContentTemplate =

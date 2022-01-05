@@ -5,7 +5,6 @@
 module Decks.Compiler.CodeGen.Generate where
 
 import           Decks.Compiler.CodeGen.Types
-import           Decks.Compiler.Error
 import           Decks.Compiler.Grammar
 import           Decks.Utils                    ( Html )
 
@@ -13,6 +12,7 @@ import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
 import           Data.Functor                   ( (<&>) )
+import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 
 --------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ data HtmlAttributes = HtmlAttributes
 
 -- | Returns the HTML attributes text corresponding to the properties on the
 -- Decks element.
-fillCtProps :: [DecksElemProp] -> HtmlResult
+fillCtProps :: DecksElemProps -> HtmlResult
 fillCtProps = attrsToHtml . processProps
   where
     attrsToHtml :: HtmlAttributes -> HtmlResult
@@ -76,42 +76,27 @@ fillCtProps = attrsToHtml . processProps
             . sequenceA
             $ [attrIdent, attrClasses, attrStyles, attrAttrs]
 
-    processProps :: [DecksElemProp] -> HtmlAttributes
-    processProps ps =
-        let isId (ElemPropId _) = True
-            isId _              = False
-            isClass (ElemPropClass _) = True
-            isClass _                 = False
-            isStyle (ElemPropStyle _ _) = True
-            isStyle _                   = False
-            isAttr (ElemPropAttr _) = True
-            isAttr _                = False
-            process converter predicate = converter . filter predicate $ ps
-        in  HtmlAttributes
-                { attrIdent   = process idsToHtml isId
-                , attrClasses = process classesToHtml isClass
-                , attrStyles  = process stylesToHtml isStyle
-                , attrAttrs   = process (Right . T.unwords . map propAttrName)
-                                        isAttr
-                }
+    processProps :: DecksElemProps -> HtmlAttributes
+    processProps DecksElemProps {..} = HtmlAttributes
+        { attrIdent   = idsToHtml propId
+        , attrClasses = classesToHtml propClasses
+        , attrStyles  = stylesToHtml propStyles
+        , attrAttrs   = Right . T.unwords $ propAttrs
+        }
 
-    idsToHtml :: [DecksElemProp] -> HtmlResult
-    idsToHtml []             = Right ""
-    idsToHtml [ElemPropId i] = Right $ "id=\"" <> i <> "\""
-    idsToHtml _              = Left MultipleElemPropIds
+    idsToHtml :: Maybe Text -> HtmlResult
+    idsToHtml Nothing  = Right ""
+    idsToHtml (Just i) = Right $ "id=\"" <> i <> "\""
 
-    classesToHtml :: [DecksElemProp] -> HtmlResult
+    classesToHtml :: [Text] -> HtmlResult
     classesToHtml [] = Right ""
-    classesToHtml cs =
-        let clsNames =
-                T.unwords $ map (\(ElemPropClass name) -> "." <> name) cs
-        in  Right $ "class=\"" <> clsNames <> "\""
+    classesToHtml cs = Right $ "class=\"" <> stringified <> "\""
+        where stringified = T.unwords . map ("." <>) $ cs
 
-    stylesToHtml :: [DecksElemProp] -> HtmlResult
+    stylesToHtml :: [(Text, Text)] -> HtmlResult
     stylesToHtml [] = Right ""
-    stylesToHtml ps =
-        let kvTexts = T.unwords
-                $ map (\(ElemPropStyle k v) -> T.concat [k, ":", v, ";"]) ps
-        in  Right $ "style=\"" <> kvTexts <> "\""
+    stylesToHtml ps = Right $ "style=\"" <> stringified <> "\""
+      where
+        stringified = T.unwords $ map (\(k, v) -> T.concat [k, ":", v, ";"]) ps
 
 --------------------------------------------------------------------------------

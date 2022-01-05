@@ -4,7 +4,9 @@
 --
 module Decks.Compiler.Grammar where
 
+import           Control.Applicative            ( (<|>) )
 import           Data.Hashable                  ( Hashable )
+import           Data.List                      ( union )
 import           Data.Text                      ( Text )
 
 --------------------------------------------------------------------------------
@@ -43,7 +45,7 @@ newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }
 -- | A drawable element statement.
 data DecksElement = DecksElement
     { elIdent :: Identifier
-    , elProps :: [DecksElemProp]
+    , elProps :: DecksElemProps
     , elStmts :: [DecksStmt]
     }
     deriving (Eq, Show)
@@ -53,16 +55,21 @@ data DecksElement = DecksElement
 -- While these can be generated into HTML, Decks attributes have different
 -- syntax to HTML attributes, so they should not be confused.
 --
-data DecksElemProp
-    = ElemPropId Text               -- ^ Decks syntax: @#identifier@
-    | ElemPropClass Text            -- ^ Decks syntax: @.class-name@
-    | ElemPropStyle                 -- ^ Decks syntax: @key="val"@
-        { propStyKey :: Text
-        , propStyVal :: Text
-        }
-    | ElemPropAttr                  -- ^ Decks syntax: @attr@
-        { propAttrName :: Text
-        }
+data DecksElemProps = DecksElemProps
+    { propId      :: Maybe Text       -- ^ Decks syntax: @#identifier@
+    , propClasses :: [Text]           -- ^ Decks syntax: @.class-name@
+    , propStyles  :: [(Text, Text)]   -- ^ Decks syntax: @key="val"@
+    , propAttrs   :: [Text]           -- ^ Decks syntax: @attr@
+    }
     deriving (Eq, Show)
+
+instance Semigroup DecksElemProps where
+    p1 <> p2 = DecksElemProps (propId p1 <|> propId p2)
+                              (propClasses p1 `union` propClasses p2)
+                              (propStyles p1 `union` propStyles p2)
+                              (propAttrs p1 `union` propAttrs p2)
+
+instance Monoid DecksElemProps where
+    mempty = DecksElemProps Nothing [] [] []
 
 --------------------------------------------------------------------------------

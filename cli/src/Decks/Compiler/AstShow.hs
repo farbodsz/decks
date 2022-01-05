@@ -6,7 +6,9 @@ module Decks.Compiler.AstShow where
 
 import           Decks.Compiler.Grammar
 
+import           Data.Maybe                     ( fromMaybe )
 import           Data.Text                      ( Text )
+import qualified Data.Text                     as T
 
 --------------------------------------------------------------------------------
 
@@ -33,18 +35,27 @@ instance AstShow DecksStmt where
     astShow w (DecksComment txt) = treeFmt w "Comment" [txt]
 
 instance AstShow DecksElement where
-    astShow w (DecksElement i as stmts) = treeFmt w "Element"
+    astShow w (DecksElement i ps stmts) = treeFmt w "Element"
         $ concat [identTxt, propsTxt, contTxt]
       where
         identTxt = astShow w i
-        propsTxt = concatMap (astShow w) as
+        propsTxt = astShow w ps
         contTxt  = concatMap (astShow w) stmts
 
-instance AstShow DecksElemProp where
-    astShow _ (ElemPropId    i  ) = ["ElemPropId " <> i]
-    astShow _ (ElemPropClass c  ) = ["ElemPropClass " <> c]
-    astShow _ (ElemPropStyle k v) = ["ElemPropStyle " <> k <> " = " <> v]
-    astShow _ (ElemPropAttr a   ) = ["ElemPropAttr " <> a]
+instance AstShow DecksElemProps where
+    astShow w DecksElemProps {..} = treeFmt w "ElemProps" propLines
+      where
+        propLines = map (uncurry (<>)) . filter (not . T.null . snd) $ zip
+            propLabels
+            propValues
+        propLabels = ["id=", "classes=", "styles=", "attrs="] :: [Text]
+        propValues = [idTxt, clsTxt, styTxt, attrTxt]
+
+        idTxt      = fromMaybe "" propId
+        clsTxt     = T.intercalate ", " propClasses
+        styTxt =
+            T.intercalate ", " . map (\(k, v) -> k <> "=" <> v) $ propStyles
+        attrTxt = T.intercalate ", " propAttrs
 
 instance AstShow ContentTemplate where
     astShow w (ContentTemplate ct) = treeFmt w "ContentTemplate " [ct]
