@@ -78,10 +78,10 @@ fillCtProps = propsAsHtml . processProps
 
     processProps :: DecksElemProps -> HtmlAttributes
     processProps DecksElemProps {..} = HtmlAttributes
-        { attrIdent   = idsToHtml propId
-        , attrClasses = classesToHtml propClasses
-        , attrStyles  = stylesToHtml propStyles
-        , attrAttrs   = attrsToHtml propAttrs
+        { attrIdent   = idsToHtml propsId
+        , attrClasses = classesToHtml propsClasses
+        , attrStyles  = stylesToHtml propsStyles
+        , attrAttrs   = attrsToHtml propsAttrs
         }
 
     idsToHtml :: Maybe Text -> HtmlResult

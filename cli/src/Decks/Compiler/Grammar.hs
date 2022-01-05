@@ -56,18 +56,18 @@ data DecksElement = DecksElement
 -- syntax to HTML attributes, so they should not be confused.
 --
 data DecksElemProps = DecksElemProps
-    { propId      :: Maybe Text             -- ^ Decks syntax: @#identifier@
-    , propClasses :: [Text]                 -- ^ Decks syntax: @.class-name@
-    , propStyles  :: [(Text, Text)]         -- ^ Decks syntax: @%key="val"@
-    , propAttrs   :: [(Text, Maybe Text)]   -- ^ Decks syntax: @attr="val"@
+    { propsId      :: Maybe Text              -- ^ Decks syntax: @#identifier@
+    , propsClasses :: [Text]                  -- ^ Decks syntax: @.class-name@
+    , propsStyles  :: [(Text, Text)]          -- ^ Decks syntax: @%key="val"@
+    , propsAttrs   :: [(Text, Maybe Text)]    -- ^ Decks syntax: @attr="val"@
     }
     deriving (Eq, Show)
 
 instance Semigroup DecksElemProps where
-    p1 <> p2 = DecksElemProps (propId p1 <|> propId p2)
-                              (propClasses p1 `union` propClasses p2)
-                              (propStyles p1 `union` propStyles p2)
-                              (propAttrs p1 `union` propAttrs p2)
+    p1 <> p2 = DecksElemProps (propsId p1 <|> propsId p2)
+                              (propsClasses p1 `union` propsClasses p2)
+                              (propsStyles p1 `union` propsStyles p2)
+                              (propsAttrs p1 `union` propsAttrs p2)
 
 instance Monoid DecksElemProps where
     mempty = DecksElemProps Nothing [] [] []

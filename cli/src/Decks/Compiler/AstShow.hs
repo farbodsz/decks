@@ -52,10 +52,10 @@ instance AstShow DecksElemProps where
         propLabels = ["id=", "classes=", "styles=", "attrs="] :: [Text]
         propValues = [idTxt, clsTxt, styTxt, attrTxt]
 
-        idTxt      = fromMaybe "" propId
-        clsTxt     = T.intercalate ", " propClasses
-        styTxt     = mkKeyValTxt $ fmap (second Just) propStyles
-        attrTxt    = mkKeyValTxt propAttrs
+        idTxt      = fromMaybe "" propsId
+        clsTxt     = T.intercalate ", " propsClasses
+        styTxt     = mkKeyValTxt $ fmap (second Just) propsStyles
+        attrTxt    = mkKeyValTxt propsAttrs
 
         mkKeyValTxt ps =
             T.intercalate ", " . map (\(k, v) -> k <> maybe "" ("=" <>) v) $ ps
