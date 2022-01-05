@@ -58,7 +58,7 @@ data DecksElement = DecksElement
 data DecksElemProps = DecksElemProps
     { propId      :: Maybe Text       -- ^ Decks syntax: @#identifier@
     , propClasses :: [Text]           -- ^ Decks syntax: @.class-name@
-    , propStyles  :: [(Text, Text)]   -- ^ Decks syntax: @key="val"@
+    , propStyles  :: [(Text, Text)]   -- ^ Decks syntax: @%key="val"@
     , propAttrs   :: [Text]           -- ^ Decks syntax: @attr@
     }
     deriving (Eq, Show)

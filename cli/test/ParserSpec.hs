@@ -62,7 +62,7 @@ testUnits = describe "unit tests" $ do
             parse pElement "" "foo"
                 `shouldParse` DecksElement (Identifier "foo") mempty []
         it "can parse multiple attributes" $ do
-            parse pElement "" "foo [ #id .class x=0 y-prop=\"test\" z ]"
+            parse pElement "" "foo [ #id .class %x=0 %y-prop=\"test\" z ]"
                 `shouldParse` DecksElement
                                   (Identifier "foo")
                                   (DecksElemProps
@@ -142,10 +142,10 @@ testUnits = describe "unit tests" $ do
             parse pProps "" ".my-class"
                 `shouldParse` mempty { propClasses = ["my-class"] }
         it "can recognise style property" $ do
-            parse pProps "" "height=25px"
+            parse pProps "" "%height=25px"
                 `shouldParse` mempty { propStyles = [("height", "25px")] }
         it "can recognise style with values in quotes" $ do
-            parse pProps "" "color=\"#FF0\""
+            parse pProps "" "%color=\"#FF0\""
                 `shouldParse` mempty { propStyles = [("color", "#FF0")] }
         it "can recognise a standalone HTML attribute" $ do
             parse pProps "" "data-template"

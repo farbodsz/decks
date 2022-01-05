@@ -96,7 +96,8 @@ pProps =
   where
     pId    = char '#' *> identChars
     pClass = char '.' *> identChars
-    pStyle = try $ liftM2 (,) (identChars <* char '=') (optQuoted valueChars)
+    pStyle = char '%'
+        *> liftM2 (,) (identChars <* char '=') (optQuoted valueChars)
       where
         valueChars = fmap T.pack . some $ satisfy tokPred
         tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
