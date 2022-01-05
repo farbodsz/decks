@@ -15,10 +15,11 @@ syn match decksComment /\v^\/\/.*$/
 
 syn match decksDraw /\v^ *[A-Za-z0-9]+/
 
-syn region decksCssRegion start=/\[/ end=/\]/ contains=decksCssId,decksCssCls,decksCssStyle
-syn match decksCssId /\v#[A-Za-z0-9_-]+/ contained
-syn match decksCssCls /\v\.[A-Za-z0-9_-]+/ contained
-syn match decksCssStyle /\v[a-z-]+\=/ contained
+syn region decksPropsRegion start=/\[/ end=/\]/ contains=decksHtmlId,decksHtmlCls,decksHtmlStyle
+syn match decksHtmlId /\v#[A-Za-z0-9_-]+/ contained
+syn match decksHtmlCls /\v\.[A-Za-z0-9_-]+/ contained
+syn match decksHtmlStyle /\v\%[a-z-]+/ contained
+syn match decksHtmlAttr /\v[a-z-]+/ contained
 
 syn region decksString start=/"/ skip=/\v\\"/ end=/"/
 syn region decksStringMulti start=/\[\[/ end=/\]\]/
@@ -33,9 +34,10 @@ hi def link decksComment Comment
 
 hi def link decksDraw Type
 
-hi def link decksCssId Identifier
-hi def link decksCssCls Identifier
-hi def link decksCssStyle Identifier
+hi def link decksHtmlId Identifier
+hi def link decksHtmlCls Identifier
+hi def link decksHtmlStyle Identifier
+hi def link decksHtmlAttr Identifier
 
 hi def link decksString String
 hi def link decksStringMulti String

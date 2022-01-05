@@ -3,7 +3,7 @@
 }
 !def heading = { <h3 $props$>$content$</h3> }
 
-!let blueSlide = slide [color="blue"]
+!let blueSlide = slide [%color="blue"]
 
 blueSlide {
   heading { "This is a blue slide." }

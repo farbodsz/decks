@@ -27,14 +27,14 @@ let_stmt ::= "!let" identifier "=" element_stmt
 def_stmt ::= "!def" identifier "=" "{" content_template "}"
 include_stmt ::= "!include" "\"" path "\""
 
-content_template ::= any "$attrs$" any "$content$" any
+content_template ::= any "$props$" any "$content$" any
 path ::= [A-Za-z/.]+
 
 
 # DRAW STATEMENTS
 
-element_stmt ::= identifier "[" attrs "]" "{" [stmt] "}"
-              |  identifier "[" attrs "]"
+element_stmt ::= identifier "[" props "]" "{" [stmt] "}"
+              |  identifier "[" props "]"
               |  identifier "{" [stmt] "}"
               |  identifier
 
@@ -44,13 +44,15 @@ string_literal ::= "\"" content_single_line "\""
 content_single_line ::= any
 content_multi_line ::= any | newline
 
-attrs ::= css_identifier
-       |  css_class
-       |  css_style
+props ::= html_identifier
+       |  html_class
+       |  html_style
+       |  html_attr
 
-css_identifier ::= "#" [A-Za-z\-_]+
-css_class      ::= "." [A-Za-z\-_]+
-css_style      ::= [A-Za-z\-_]+ "=" any
+html_identifier ::= "#" [A-Za-z\-_]+
+html_class      ::= "." [A-Za-z\-_]+
+html_style      ::= "%" [A-Za-z\-_]+ "=" any
+html_attr       ::= [A-Za-z\-_]+ "=" any
 
 
 # MISC 
