@@ -149,7 +149,12 @@ testUnits = describe "unit tests" $ do
                 `shouldParse` mempty { propStyles = [("color", "#FF0")] }
         it "can recognise a standalone HTML attribute" $ do
             parse pProps "" "data-template"
-                `shouldParse` mempty { propAttrs = [("data-template", Nothing)] }
+                `shouldParse` mempty
+                                  { propAttrs = [("data-template", Nothing)]
+                                  }
+        it "can recognise a HTML attribute with value" $ do
+            parse pProps "" "data-custom=5"
+                `shouldParse` mempty { propAttrs = [("data-custom", Just "5")] }
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do
