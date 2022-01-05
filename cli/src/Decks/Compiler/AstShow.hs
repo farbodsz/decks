@@ -6,6 +6,7 @@ module Decks.Compiler.AstShow where
 
 import           Decks.Compiler.Grammar
 
+import           Data.Bifunctor                 ( Bifunctor(second) )
 import           Data.Maybe                     ( fromMaybe )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
@@ -53,9 +54,11 @@ instance AstShow DecksElemProps where
 
         idTxt      = fromMaybe "" propId
         clsTxt     = T.intercalate ", " propClasses
-        styTxt =
-            T.intercalate ", " . map (\(k, v) -> k <> "=" <> v) $ propStyles
-        attrTxt = T.intercalate ", " propAttrs
+        styTxt     = mkKeyValTxt $ fmap (second Just) propStyles
+        attrTxt    = mkKeyValTxt propAttrs
+
+        mkKeyValTxt ps =
+            T.intercalate ", " . map (\(k, v) -> k <> maybe "" ("=" <>) v) $ ps
 
 instance AstShow ContentTemplate where
     astShow w (ContentTemplate ct) = treeFmt w "ContentTemplate " [ct]

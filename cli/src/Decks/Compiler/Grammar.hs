@@ -56,10 +56,10 @@ data DecksElement = DecksElement
 -- syntax to HTML attributes, so they should not be confused.
 --
 data DecksElemProps = DecksElemProps
-    { propId      :: Maybe Text       -- ^ Decks syntax: @#identifier@
-    , propClasses :: [Text]           -- ^ Decks syntax: @.class-name@
-    , propStyles  :: [(Text, Text)]   -- ^ Decks syntax: @%key="val"@
-    , propAttrs   :: [Text]           -- ^ Decks syntax: @attr@
+    { propId      :: Maybe Text             -- ^ Decks syntax: @#identifier@
+    , propClasses :: [Text]                 -- ^ Decks syntax: @.class-name@
+    , propStyles  :: [(Text, Text)]         -- ^ Decks syntax: @%key="val"@
+    , propAttrs   :: [(Text, Maybe Text)]   -- ^ Decks syntax: @attr="val"@
     }
     deriving (Eq, Show)
 

@@ -96,12 +96,13 @@ pProps =
   where
     pId    = char '#' *> identChars
     pClass = char '.' *> identChars
-    pStyle = char '%'
-        *> liftM2 (,) (identChars <* char '=') (optQuoted valueChars)
+    pStyle =
+        char '%' *> liftM2 (,) identChars (char '=' *> optQuoted valueChars)
+    pAttr = (,) <$> identChars <*> optional (char '=' *> optQuoted valueChars)
+
+    valueChars = fmap T.pack . some $ satisfy tokPred
       where
-        valueChars = fmap T.pack . some $ satisfy tokPred
         tokPred = liftM2 (&&) (`notElem` ("{}\"[]" :: String)) (not . isSpace)
-    pAttr = identChars
 
 pContentTemplate :: Parser ContentTemplate
 pContentTemplate =
