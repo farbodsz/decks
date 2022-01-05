@@ -68,10 +68,10 @@ data HtmlAttributes = HtmlAttributes
 -- | Returns the HTML attributes text corresponding to the properties on the
 -- Decks element.
 fillCtProps :: DecksElemProps -> HtmlResult
-fillCtProps = attrsToHtml . processProps
+fillCtProps = propsAsHtml . processProps
   where
-    attrsToHtml :: HtmlAttributes -> HtmlResult
-    attrsToHtml HtmlAttributes {..} =
+    propsAsHtml :: HtmlAttributes -> HtmlResult
+    propsAsHtml HtmlAttributes {..} =
         fmap (T.strip . T.unwords)
             . sequenceA
             $ [attrIdent, attrClasses, attrStyles, attrAttrs]
@@ -81,7 +81,7 @@ fillCtProps = attrsToHtml . processProps
         { attrIdent   = idsToHtml propId
         , attrClasses = classesToHtml propClasses
         , attrStyles  = stylesToHtml propStyles
-        , attrAttrs   = Right . T.unwords $ propAttrs
+        , attrAttrs   = attrsToHtml propAttrs
         }
 
     idsToHtml :: Maybe Text -> HtmlResult
@@ -91,12 +91,18 @@ fillCtProps = attrsToHtml . processProps
     classesToHtml :: [Text] -> HtmlResult
     classesToHtml [] = Right ""
     classesToHtml cs = Right $ "class=\"" <> stringified <> "\""
-        where stringified = T.unwords . map ("." <>) $ cs
+        where stringified = unwordsMap ("." <>) cs
 
     stylesToHtml :: [(Text, Text)] -> HtmlResult
     stylesToHtml [] = Right ""
     stylesToHtml ps = Right $ "style=\"" <> stringified <> "\""
       where
-        stringified = T.unwords $ map (\(k, v) -> T.concat [k, ":", v, ";"]) ps
+        stringified = unwordsMap (\(k, v) -> T.concat [k, ":", v, ";"]) ps
+
+    attrsToHtml :: [(Text, Maybe Text)] -> HtmlResult
+    attrsToHtml = Right . unwordsMap (\(k, mv) -> k <> maybe "" ("=" <>) mv)
+
+    unwordsMap :: (a -> Text) -> [a] -> Text
+    unwordsMap f = T.unwords . map f
 
 --------------------------------------------------------------------------------

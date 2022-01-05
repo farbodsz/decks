@@ -71,7 +71,7 @@ testUnits = describe "unit tests" $ do
                                       , propStyles  = [ ("x"     , "0")
                                                       , ("y-prop", "test")
                                                       ]
-                                      , propAttrs   = ["z"]
+                                      , propAttrs   = [("z", Nothing)]
                                       }
                                   )
                                   []
@@ -149,7 +149,7 @@ testUnits = describe "unit tests" $ do
                 `shouldParse` mempty { propStyles = [("color", "#FF0")] }
         it "can recognise a standalone HTML attribute" $ do
             parse pProps "" "data-template"
-                `shouldParse` mempty { propAttrs = ["data-template"] }
+                `shouldParse` mempty { propAttrs = [("data-template", Nothing)] }
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do

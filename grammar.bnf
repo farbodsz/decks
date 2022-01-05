@@ -52,7 +52,8 @@ props ::= html_identifier
 html_identifier ::= "#" [A-Za-z\-_]+
 html_class      ::= "." [A-Za-z\-_]+
 html_style      ::= "%" [A-Za-z\-_]+ "=" any
-html_attr       ::= [A-Za-z\-_]+ "=" any
+html_attr       ::= [A-Za-z\-_]+
+                 |  [A-Za-z\-_]+ "=" any
 
 
 # MISC 
