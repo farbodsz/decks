@@ -108,7 +108,7 @@ pContentTemplate :: Parser ContentTemplate
 pContentTemplate =
     ContentTemplate
         .   T.concat
-        <$> liftM5 list5
+        <$> liftM5 mkList5
                    allowedChars
                    (templateStr "props")
                    allowedChars
@@ -119,7 +119,7 @@ pContentTemplate =
     allowedChars = fmap T.pack <$> some $ noneOf ['{', '}', '$']
 
     templateStr :: Text -> Parser Text
-    templateStr name = T.concat <$> liftM3 list3
+    templateStr name = T.concat <$> liftM3 mkList3
                                            (T.singleton <$> char '$')
                                            (string name)
                                            (T.singleton <$> char '$')
