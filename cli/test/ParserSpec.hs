@@ -47,28 +47,33 @@ testUnits = describe "unit tests" $ do
             parse pElement "" "foo [.my-class] { \"bar\" }"
                 `shouldParse` DecksElement
                                   { elIdent = Identifier "foo"
-                                  , elProps = [ElemPropClass "my-class"]
+                                  , elProps = mempty
+                                                  { propClasses = ["my-class"]
+                                                  }
                                   , elStmts = [DecksLiteral "bar"]
                                   }
         it "has optional attrs" $ do
             parse pElement "" "foo { \"bar\" }" `shouldParse` DecksElement
                 { elIdent = Identifier "foo"
-                , elProps = []
+                , elProps = mempty
                 , elStmts = [DecksLiteral "bar"]
                 }
         it "has optional props and content" $ do
             parse pElement "" "foo"
-                `shouldParse` DecksElement (Identifier "foo") [] []
+                `shouldParse` DecksElement (Identifier "foo") mempty []
         it "can parse multiple attributes" $ do
-            parse pElement "" "foo [ .class #id x=0 y-prop=\"test\" z ]"
+            parse pElement "" "foo [ #id .class x=0 y-prop=\"test\" z ]"
                 `shouldParse` DecksElement
                                   (Identifier "foo")
-                                  [ ElemPropClass "class"
-                                  , ElemPropId "id"
-                                  , ElemPropStyle "x"      "0"
-                                  , ElemPropStyle "y-prop" "test"
-                                  , ElemPropAttr "z"
-                                  ]
+                                  (DecksElemProps
+                                      { propId      = Just "id"
+                                      , propClasses = ["class"]
+                                      , propStyles  = [ ("x"     , "0")
+                                                      , ("y-prop", "test")
+                                                      ]
+                                      , propAttrs   = ["z"]
+                                      }
+                                  )
                                   []
         it "can include let inside" $ do
             let
@@ -81,19 +86,22 @@ testUnits = describe "unit tests" $ do
                 \"
             parse pElement "" str `shouldParse` DecksElement
                 (Identifier "foo")
-                []
+                mempty
                 [ DecksLetStmt
                     { letIdent = Identifier "bar"
                     , letElem  = DecksElement
                                      { elIdent = Identifier "oof"
-                                     , elProps = [ElemPropClass "custom-class"]
+                                     , elProps = mempty
+                                                     { propClasses =
+                                                         ["custom-class"]
+                                                     }
                                      , elStmts = [DecksLiteral "default"]
                                      }
                     }
-                , DecksDrawStmt (DecksElement (Identifier "bar") [] [])
+                , DecksDrawStmt (DecksElement (Identifier "bar") mempty [])
                 , DecksDrawStmt
                     (DecksElement (Identifier "bar")
-                                  []
+                                  mempty
                                   [DecksLiteral "overridden"]
                     )
                 ]
@@ -126,20 +134,22 @@ testUnits = describe "unit tests" $ do
             let str = "\"  foo bar\"  "
             parse pLiteral "" str `shouldParse` DecksLiteral "foo bar"
 
-    describe "pProp" $ do
+    describe "pProps" $ do
         it "can recognise HTML id property" $ do
-            parse pProp "" "#my-class" `shouldParse` ElemPropId "my-class"
+            parse pProps "" "#my-ident"
+                `shouldParse` mempty { propId = Just "my-ident" }
         it "can recognise class property" $ do
-            parse pProp "" ".my-class" `shouldParse` ElemPropClass "my-class"
+            parse pProps "" ".my-class"
+                `shouldParse` mempty { propClasses = ["my-class"] }
         it "can recognise style property" $ do
-            parse pProp "" "height=25px"
-                `shouldParse` ElemPropStyle "height" "25px"
+            parse pProps "" "height=25px"
+                `shouldParse` mempty { propStyles = [("height", "25px")] }
         it "can recognise style with values in quotes" $ do
-            parse pProp "" "color=\"#FF0\""
-                `shouldParse` ElemPropStyle "color" "#FF0"
+            parse pProps "" "color=\"#FF0\""
+                `shouldParse` mempty { propStyles = [("color", "#FF0")] }
         it "can recognise a standalone HTML attribute" $ do
-            parse pProp "" "data-template"
-                `shouldParse` ElemPropAttr "data-template"
+            parse pProps "" "data-template"
+                `shouldParse` mempty { propAttrs = ["data-template"] }
 
     describe "pContentTemplate" $ do
         it "can parse a basic content template" $ do
@@ -158,7 +168,10 @@ testUnits = describe "unit tests" $ do
                 `shouldParse` DecksDrawStmt
                                   (DecksElement
                                       { elIdent = Identifier "bar"
-                                      , elProps = [ElemPropClass "my-class"]
+                                      , elProps = mempty
+                                                      { propClasses =
+                                                          ["my-class"]
+                                                      }
                                       , elStmts = [DecksLiteral "content"]
                                       }
                                   )
@@ -170,7 +183,10 @@ testUnits = describe "unit tests" $ do
                                   (Identifier "foo")
                                   (DecksElement
                                       { elIdent = Identifier "bar"
-                                      , elProps = [ElemPropClass "my-class"]
+                                      , elProps = mempty
+                                                      { propClasses =
+                                                          ["my-class"]
+                                                      }
                                       , elStmts = [DecksLiteral "content"]
                                       }
                                   )
@@ -190,14 +206,14 @@ testUnits = describe "unit tests" $ do
                 `shouldParse` DecksDrawStmt
                                   (DecksElement
                                       (Identifier "bar")
-                                      []
+                                      mempty
                                       [DecksLiteral "overridden content"]
                                   )
         it "can recognise let stmts" $ do
             parse pStmt "" "!let foo=bar [.my-class]" `shouldParse` DecksLetStmt
                 (Identifier "foo")
                 DecksElement { elIdent = Identifier "bar"
-                             , elProps = [ElemPropClass "my-class"]
+                             , elProps = mempty { propClasses = ["my-class"] }
                              , elStmts = []
                              }
 
