@@ -4,13 +4,20 @@
 --
 module Decks.Utils where
 
-import Data.Text (Text)
+import           Data.Text                      ( Text )
 
 --------------------------------------------------------------------------------
 
 type Html = Text
 
 type URL = Text
+
+--------------------------------------------------------------------------------
+
+-- Like 'maybe' but for a possibly empty list.
+fromList :: b -> ([a] -> b) -> [a] -> b
+fromList def _ [] = def
+fromList _   f xs = f xs
 
 --------------------------------------------------------------------------------
 
