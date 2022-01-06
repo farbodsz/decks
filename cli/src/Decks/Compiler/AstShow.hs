@@ -4,6 +4,7 @@
 --
 module Decks.Compiler.AstShow where
 
+import           Decks.Compiler.CodeGen.Attributes
 import           Decks.Compiler.Grammar
 
 import           Data.Bifunctor                 ( Bifunctor(second) )
@@ -53,12 +54,12 @@ instance AstShow DecksElemProps where
         propValues = [idTxt, clsTxt, styTxt, attrTxt]
 
         idTxt      = fromMaybe "" propsId
-        clsTxt     = T.intercalate ", " propsClasses
-        styTxt     = mkKeyValTxt $ fmap (second Just) propsStyles
-        attrTxt    = mkKeyValTxt propsAttrs
+        clsTxt     = list propsClasses
+        styTxt     = list . map mkKV . fmap (second Just) $ propsStyles
+        attrTxt    = list . map mkKV $ propsAttrs
 
-        mkKeyValTxt ps =
-            T.intercalate ", " . map (\(k, v) -> k <> maybe "" ("=" <>) v) $ ps
+        list       = T.intercalate ", "
+        mkKV       = mkKeyValTxt ":"
 
 instance AstShow ContentTemplate where
     astShow w (ContentTemplate ct) = treeFmt w "ContentTemplate " [ct]

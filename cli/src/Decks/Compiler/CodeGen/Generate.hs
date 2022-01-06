@@ -4,14 +4,17 @@
 --
 module Decks.Compiler.CodeGen.Generate where
 
+import           Decks.Compiler.CodeGen.Attributes
 import           Decks.Compiler.CodeGen.Types
 import           Decks.Compiler.Grammar
-import           Decks.Utils                    ( Html )
+import           Decks.Utils
 
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
+import           Data.Bifunctor                 ( Bifunctor(second) )
 import           Data.Functor                   ( (<&>) )
+import           Data.Maybe                     ( catMaybes )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 
@@ -68,7 +71,7 @@ data HtmlAttributes = HtmlAttributes
 -- | Returns the HTML attributes text corresponding to the properties on the
 -- Decks element.
 fillCtProps :: DecksElemProps -> HtmlResult
-fillCtProps = propsAsHtml . processProps
+fillCtProps = propsAsHtml . processProps . tagDecksElem
   where
     propsAsHtml :: HtmlAttributes -> HtmlResult
     propsAsHtml HtmlAttributes {..} =
@@ -78,31 +81,60 @@ fillCtProps = propsAsHtml . processProps
 
     processProps :: DecksElemProps -> HtmlAttributes
     processProps DecksElemProps {..} = HtmlAttributes
-        { attrIdent   = idsToHtml propsId
+        { attrIdent   = idToHtml propsId
         , attrClasses = classesToHtml propsClasses
         , attrStyles  = stylesToHtml propsStyles
         , attrAttrs   = attrsToHtml propsAttrs
         }
 
-    idsToHtml :: Maybe Text -> HtmlResult
-    idsToHtml Nothing  = Right ""
-    idsToHtml (Just i) = Right $ "id=\"" <> i <> "\""
+    idToHtml :: Maybe Text -> HtmlResult
+    idToHtml Nothing      = Right ""
+    idToHtml mid@(Just _) = Right $ mkAttr "id" mid
 
     classesToHtml :: [Text] -> HtmlResult
     classesToHtml [] = Right ""
-    classesToHtml cs = Right $ "class=\"" <> stringified <> "\""
-        where stringified = unwordsMap ("." <>) cs
+    classesToHtml cs = Right $ mkAttr "class" (Just $ genElemClassesVal cs)
 
     stylesToHtml :: [(Text, Text)] -> HtmlResult
     stylesToHtml [] = Right ""
-    stylesToHtml ps = Right $ "style=\"" <> stringified <> "\""
-      where
-        stringified = unwordsMap (\(k, v) -> T.concat [k, ":", v, ";"]) ps
+    stylesToHtml ps = Right $ mkAttr "style" (Just $ genElemStylesVal ps)
 
     attrsToHtml :: [(Text, Maybe Text)] -> HtmlResult
-    attrsToHtml = Right . unwordsMap (\(k, mv) -> k <> maybe "" ("=" <>) mv)
+    attrsToHtml = Right . T.unwords . map (uncurry mkAttr)
 
-    unwordsMap :: (a -> Text) -> [a] -> Text
-    unwordsMap f = T.unwords . map f
+-- | Adds @data-decks-*@ attributes to the existing props.
+tagDecksElem :: DecksElemProps -> DecksElemProps
+tagDecksElem allProps@DecksElemProps {..} = allProps
+    { propsAttrs = (second Just <$> decksAttrs) ++ propsAttrs
+    }
+  where
+    decksAttrs  = catMaybes [decksIdAttr, decksClsAttr, decksStyAttr]
+    decksIdAttr = (,) <$> Just "data-decks-id" <*> propsId
+    decksClsAttr =
+        (,)
+            <$> Just "data-decks-class"
+            <*> fromList Nothing (Just . genElemClassesVal) propsClasses
+    decksStyAttr =
+        (,)
+            <$> Just "data-decks-style"
+            <*> fromList Nothing (Just . genElemStylesVal) propsStyles
+
+-- | Generates the value for the class string.
+--
+-- >>> genElemClassesVal ["first-class", "second-class"]
+-- ".first-class .second-class"
+--
+genElemClassesVal :: [Text] -> Text
+genElemClassesVal = T.unwords . map ("." <>)
+
+-- | Generates the value for the style string.
+--
+-- >>> genElemStylesVal [("color", "blue"), ("display", "inline")]
+-- "color:blue; display:inline;"
+--
+genElemStylesVal :: [(Text, Text)] -> Text
+genElemStylesVal = fromList
+    ""
+    (T.unwords . map (\(k, v) -> mkKeyValTxt ":" (k, Just v) <> ";"))
 
 --------------------------------------------------------------------------------
