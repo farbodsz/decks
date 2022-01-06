@@ -1,0 +1,7 @@
+!def slide = {
+  <section $props$>$content$</section>
+}
+
+slide [#my-slide .slide-content .slide-dark %color=blue %font-family=serif data-markdown] {
+  "My slide"
+}
