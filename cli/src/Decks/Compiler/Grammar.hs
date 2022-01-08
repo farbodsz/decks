@@ -72,4 +72,8 @@ instance Semigroup DecksElemProps where
 instance Monoid DecksElemProps where
     mempty = DecksElemProps Nothing [] [] []
 
+-- | Adds the given attribute to the current props.
+addElemAttr :: (Text, Maybe Text) -> DecksElemProps -> DecksElemProps
+addElemAttr a ps = ps { propsAttrs = a : propsAttrs ps }
+
 --------------------------------------------------------------------------------
