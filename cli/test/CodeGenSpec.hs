@@ -25,8 +25,8 @@ spec = describe "code generation" testFiles
 
 testFiles :: Spec
 testFiles = describe "test files" $ do
-    let inputsDir  = "test/res/input/"
-        outputsDir = "test/res/output/"
+    let inputsDir  = "test/res/codegen/input/"
+        outputsDir = "test/res/codegen/output/"
         inputFpath t = inputsDir ++ t ++ ".decks"
         outputFpath t = outputsDir ++ t ++ ".html"
 

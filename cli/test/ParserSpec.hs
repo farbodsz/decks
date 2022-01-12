@@ -15,11 +15,13 @@ import           Text.Megaparsec
 --------------------------------------------------------------------------------
 
 spec :: Spec
-spec = describe "parser" $ testFiles >> testUnits
+spec = describe "parser" $ do
+    testCodeGenFiles
+    testUnits
 
-testFiles :: Spec
-testFiles = describe "test files" $ do
-    let resDir = "test/res/input/"
+testCodeGenFiles :: Spec
+testCodeGenFiles = describe "test files" $ do
+    let resDir = "test/res/codegen/input/"
     fileNames <-
         runIO $ filter (`notElem` [".", ".."]) <$> getDirectoryContents resDir
 
@@ -31,7 +33,7 @@ testFiles = describe "test files" $ do
 
 testUnits :: Spec
 testUnits = describe "unit tests" $ do
-    describe "pIdentifier" $ do
+    describe "identifier" $ do
         it "can parse simple identifiers" $ do
             parse pIdentifier "" "fooBar" `shouldParse` Identifier "fooBar"
         it "can contain dashes and underscores" $ do
