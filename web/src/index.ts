@@ -71,8 +71,13 @@ function editorLoadContent() {
 function editorSetupEditClicks() {
   console.log("Setting up clicks");
   const container = document.querySelector("#editor-content")!;
-  const elements: NodeListOf<HTMLElement> =
-    container.querySelectorAll("section > *");
+
+  // Limit elements that can be edited using two criteria:
+  //  - must be from the DSL, i.e. contain `data-decks-start` attribute
+  //  - must be part of the slide deck, i.e. be inside `#editor-content`
+  const elements: NodeListOf<HTMLElement> = container.querySelectorAll(
+    "#editor-content *[data-decks-start]"
+  );
 
   elements.forEach((el: HTMLElement) => {
     el.onclick = function () {
