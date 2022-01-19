@@ -7,7 +7,23 @@ module Decks.Compiler.CodeGen.Tagging where
 import           Decks.Compiler.CodeGen.Attributes
 import           Decks.Compiler.Grammar
 
+import           Control.Monad                  ( liftM2 )
+import qualified Data.Text                     as T
+import           Text.Megaparsec.Pos
+
 --------------------------------------------------------------------------------
+
+-- | Adds @data-decks-start@ and @data-decks-end@ tags given a source range.
+tagElemRange :: SrcRange -> DecksElemProps -> DecksElemProps
+tagElemRange (SrcRange start end) currProps = currProps
+    { propsAttrs = [ ("data-decks-start", mkPosStr start)
+                   , ("data-decks-end"  , mkPosStr end)
+                   ]
+    }
+  where
+    mkPosStr = Just . T.pack . show . liftM2 (,)
+                                             (unPos . sourceLine)
+                                             (unPos . sourceColumn)
 
 -- | Adds the @data-decks-class@ attribute to an element's props, using its
 -- current HTML classes.
