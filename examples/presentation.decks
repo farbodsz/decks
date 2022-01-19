@@ -4,16 +4,15 @@
 }
 
 !def heading = { <h3 $props$>$content$</h3> }
-!let md = slide [data-markdown]
 
-md {
+slide {
+  heading { "My test heading" }
+
   [[
-  ### Shopping list
-
-  - Apples
-  - Oranges 
-  - Dairy 
-    - Milk
-    - Cheese
+  Hello
   ]]
+}
+
+slide {
+  heading { "Another slide" }
 }

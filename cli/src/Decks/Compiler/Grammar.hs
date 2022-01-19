@@ -8,16 +8,18 @@ import           Control.Applicative            ( (<|>) )
 import           Data.Hashable                  ( Hashable )
 import           Data.List                      ( union )
 import           Data.Text                      ( Text )
+import           Text.Megaparsec                ( SourcePos )
+
+--------------------------------------------------------------------------------
+
+data SrcRange = SrcRange SourcePos SourcePos
+    deriving (Eq, Show)
 
 --------------------------------------------------------------------------------
 
 -- | The Parse Syntax Tree for the Decks program.
 newtype DecksProgram = DecksProgram [DecksStmt]
     deriving Show
-
--- | Identifies a drawable element.
-newtype Identifier = Identifier { unIdentifier :: Text }
-    deriving (Eq, Hashable, Show)
 
 data DecksStmt
     = DecksDrawStmt
@@ -31,16 +33,21 @@ data DecksStmt
         { defIdent           :: Identifier
         , defContentTemplate :: ContentTemplate
         }
-    | DecksLiteral
-        { litContent :: Text
-        }
+    | DecksString SrcRange Text
+    | DecksLiteral Text
     | DecksComment
         { commentText :: Text
         }
     deriving (Eq, Show)
 
+-- | Identifies a drawable element.
+newtype Identifier = Identifier { unIdentifier :: Text }
+    deriving (Eq, Hashable, Show)
+
 newtype ContentTemplate = ContentTemplate { unContentTemplate :: Text }
     deriving (Eq, Show)
+
+--------------------------------------------------------------------------------
 
 -- | A drawable element statement.
 data DecksElement = DecksElement

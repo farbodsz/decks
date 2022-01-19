@@ -50,7 +50,7 @@ pProgram :: Parser DecksProgram
 pProgram = DecksProgram <$> some pStmt <* eof
 
 pStmt :: Parser DecksStmt
-pStmt = choice [pDrawStmt, pLetStmt, pDefStmt, pLiteral, pComment]
+pStmt = choice [pDrawStmt, pLetStmt, pDefStmt, pString, pComment]
     <* many (newline *> space)
 
 pDrawStmt :: Parser DecksStmt
@@ -68,12 +68,14 @@ pDefStmt =
         <$> (string "!def" *> space1 *> pIdentifier)
         <*> (space *> char '=' *> space *> braced pContentTemplate)
 
--- TODO: Support more characters, and escaped characters (like braces)
-pLiteral :: Parser DecksStmt
-pLiteral = DecksLiteral . T.strip . T.pack <$> (singleLine <|> multiLine)
-  where
-    singleLine = "\"" *> many (noneOf ['"', '\n', '\r']) <* "\""
-    multiLine  = "[[" *> many (noneOf ['[', ']']) <* "]]"
+pString :: Parser DecksStmt
+pString = do
+    start <- getSourcePos
+    let singleLine = "\"" *> many (noneOf ['"', '\n', '\r']) <* "\""
+        multiLine  = "[[" *> many (noneOf ['[', ']']) <* "]]"
+    litContents <- T.strip . T.pack <$> (singleLine <|> multiLine)
+    end         <- getSourcePos
+    pure $ DecksString (SrcRange start end) litContents
 
 pComment :: Parser DecksStmt
 pComment = DecksComment <$> (string "//" *> commentChars)
