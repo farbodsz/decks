@@ -3,7 +3,7 @@
 module Main where
 
 import qualified CodeGenSpec
-import qualified ParserSpec
+-- import qualified ParserSpec
 
 import           Test.Hspec
 
@@ -11,7 +11,7 @@ import           Test.Hspec
 
 main :: IO ()
 main = hspec $ do
-    ParserSpec.spec
+    -- ParserSpec.spec
     CodeGenSpec.spec
 
 --------------------------------------------------------------------------------
