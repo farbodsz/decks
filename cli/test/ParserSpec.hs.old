@@ -1,3 +1,5 @@
+--------------------------------------------------------------------------------
+
 module ParserSpec
     ( spec
     ) where
@@ -108,13 +110,13 @@ testUnits = describe "unit tests" $ do
                     )
                 ]
 
-    describe "pLiteral" $ do
+    describe "pString" $ do
         it "can contain spaces, dashes, underscores" $ do
             let str = "\"Foo-bar_foo\""
-            parse pLiteral "" str `shouldParse` DecksLiteral "Foo-bar_foo"
+            parse pString "" str `shouldParse` DecksString _ "Foo-bar_foo"
         it "can contain punctuation" $ do
             let str = "\"It's good? (yes - it is!)\""
-            parse pLiteral "" str
+            parse pString "" str
                 `shouldParse` DecksLiteral "It's good? (yes - it is!)"
         it "supports multi line syntax" $ do
             let
@@ -123,18 +125,18 @@ testUnits = describe "unit tests" $ do
                 \ Here is a\n\
                 \ multiline string\n\
                 \ ]]"
-            parse pLiteral "" str
+            parse pString "" str
                 `shouldParse` DecksLiteral "Here is a\n multiline string"
         it "multi line with regular syntax fails" $ do
             let str = "\"Multi \n\
                 \ line\""
-            parse pLiteral "" `shouldFailOn` str
+            parse pString "" `shouldFailOn` str
         it "can contain numeric equations" $ do
             let str = "[[2 + 2 = 5]]"
-            parse pLiteral "" str `shouldParse` DecksLiteral "2 + 2 = 5"
+            parse pString "" str `shouldParse` DecksLiteral "2 + 2 = 5"
         it "trimmed spaces (no leading or trailing spaces)" $ do
             let str = "\"  foo bar\"  "
-            parse pLiteral "" str `shouldParse` DecksLiteral "foo bar"
+            parse pString "" str `shouldParse` DecksLiteral "foo bar"
 
     describe "pProps" $ do
         it "can recognise HTML id property" $ do
