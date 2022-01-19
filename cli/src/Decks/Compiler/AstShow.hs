@@ -33,8 +33,9 @@ instance AstShow DecksStmt where
         treeFmt w "LetStmt" $ astShow w i ++ astShow w el
     astShow w (DecksDefStmt i ct) =
         treeFmt w "DefStmt" $ astShow w i ++ astShow w ct
-    astShow w (DecksLiteral txt) = treeFmt w "Literal" [txt]
-    astShow w (DecksComment txt) = treeFmt w "Comment" [txt]
+    astShow w (DecksString _ txt) = treeFmt w "String" [txt]
+    astShow w (DecksLiteral txt ) = treeFmt w "Literal" [txt]
+    astShow w (DecksComment txt ) = treeFmt w "Comment" [txt]
 
 instance AstShow DecksElement where
     astShow w (DecksElement i ps stmts) = treeFmt w "Element"

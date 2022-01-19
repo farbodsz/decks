@@ -66,7 +66,21 @@ data DecksStore = DecksStore
     }
 
 initDecksStore :: DecksStore
-initDecksStore = DecksStore M.empty M.empty M.empty
+initDecksStore = DecksStore defaultDefs M.empty M.empty
+  where
+    defaultDefs = M.fromList
+        [ ( literalTemplateIdentifier
+          , PendingContentTemplate literalTemplate mempty mempty
+          )
+        ]
+    literalTemplate = ContentTemplate "<span $props$>$content$</span>"
+
+-- | Literals from the Decks DSL should be wrapped with a HTML tag (e.g.
+-- @span@) so that they can be selected for editing, and have modifiable
+-- attributes. This is the identifier for the 'ContentTemplate' defining
+-- this wrapping.
+literalTemplateIdentifier :: Identifier
+literalTemplateIdentifier = Identifier "__decks_literal"
 
 insertDef :: Identifier -> ContentTemplate -> DecksStore -> DecksStore
 insertDef i ct DecksStore {..} = DecksStore (M.insert i pct stDefs)

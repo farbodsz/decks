@@ -10,12 +10,15 @@ import           Decks.Compiler.CodeGen.Types
 import           Decks.Compiler.Grammar
 import           Decks.Utils
 
+import           Control.Monad                  ( liftM2 )
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 
 import           Data.Functor                   ( (<&>) )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
+
+import           Text.Megaparsec.Pos
 
 --------------------------------------------------------------------------------
 
@@ -39,6 +42,16 @@ genStmt (DecksLetStmt i DecksElement {..}) = do
     withStateT
         (markUsage elIdent . insertLet ident (updatePct pct elProps content))
         (pure mempty)
+genStmt (DecksString (SrcRange start end) txt) = do
+    let mkPosStr = Just . T.pack . show . liftM2 (,)
+                                                 (unPos . sourceLine)
+                                                 (unPos . sourceColumn)
+        props = mempty
+            { propsAttrs = [ ("data-decks-start", mkPosStr start)
+                           , ("data-decks-end"  , mkPosStr end)
+                           ]
+            }
+    genElement $ DecksElement literalTemplateIdentifier props [DecksLiteral txt]
 genStmt (DecksLiteral txt) = pure txt
 genStmt (DecksComment _  ) = pure mempty
 
