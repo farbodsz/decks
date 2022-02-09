@@ -4,18 +4,16 @@
 --
 module Decks.Compiler.CodeGen.Generate where
 
+import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
+import           Control.Monad.Trans.State
+import           Data.Functor                   ( (<&>) )
+import           Data.Text                      ( Text )
+import qualified Data.Text                     as T
 import           Decks.Compiler.CodeGen.Attributes
 import           Decks.Compiler.CodeGen.Tagging
 import           Decks.Compiler.CodeGen.Types
 import           Decks.Compiler.Grammar
 import           Decks.Utils
-
-import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
-import           Control.Monad.Trans.State
-
-import           Data.Functor                   ( (<&>) )
-import           Data.Text                      ( Text )
-import qualified Data.Text                     as T
 
 --------------------------------------------------------------------------------
 

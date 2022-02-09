@@ -5,17 +5,14 @@
 --
 module Decks.App where
 
+import           Control.Concurrent             ( threadDelay )
+import           Control.Concurrent.Async       ( concurrently_ )
+import           Control.Monad                  ( forever )
+import qualified Data.Text                     as T
 import           Decks.Commands
 import           Decks.Compiler                 ( compile )
 import           Decks.Logging
 import           Decks.Server                   ( runServer )
-
-import           Control.Concurrent             ( threadDelay )
-import           Control.Concurrent.Async       ( concurrently_ )
-import           Control.Monad                  ( forever )
-
-import qualified Data.Text                     as T
-
 import           System.Directory
 import           System.FSNotify
 import           System.FilePath                ( takeExtension )

@@ -4,13 +4,12 @@
 --
 module Decks.Compiler.AstShow where
 
-import           Decks.Compiler.CodeGen.Attributes
-import           Decks.Compiler.Grammar
-
 import           Data.Bifunctor                 ( Bifunctor(second) )
 import           Data.Maybe                     ( fromMaybe )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
+import           Decks.Compiler.CodeGen.Attributes
+import           Decks.Compiler.Grammar
 
 --------------------------------------------------------------------------------
 

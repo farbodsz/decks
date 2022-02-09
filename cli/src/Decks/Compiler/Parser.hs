@@ -4,20 +4,17 @@
 --
 module Decks.Compiler.Parser where
 
-import           Decks.Compiler.AstShow
-import           Decks.Compiler.Grammar
-import           Decks.Logging
-import           Decks.Utils
-
 import           Control.Monad
-
 import           Data.Char                      ( isSpace )
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
-
+import           Decks.Compiler.AstShow
+import           Decks.Compiler.Grammar
+import           Decks.Logging
+import           Decks.Utils
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 

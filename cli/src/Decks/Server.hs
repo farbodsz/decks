@@ -4,19 +4,15 @@
 --
 module Decks.Server where
 
+import           Control.Monad.IO.Class         ( liftIO )
+import qualified Data.Text                     as T
+import qualified Data.Text.IO                  as TIO
 import           Decks.Logging
 import           Decks.Server.API               ( DecksAPI )
 import           Decks.Server.Types
 import           Decks.Utils                    ( URL )
-
-import           Control.Monad.IO.Class         ( liftIO )
-
-import qualified Data.Text                     as T
-import qualified Data.Text.IO                  as TIO
-
 import           Network.Wai.Handler.Warp       ( run )
 import           Servant
-
 import           System.Directory               ( doesFileExist )
 
 --------------------------------------------------------------------------------
