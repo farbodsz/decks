@@ -4,10 +4,9 @@
 --
 module Decks.Compiler.Error where
 
-import           Decks.Compiler.Grammar         ( Identifier(..) )
-
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
+import           Decks.Compiler.Grammar         ( Identifier(..) )
 
 --------------------------------------------------------------------------------
 

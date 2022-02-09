@@ -4,11 +4,10 @@
 --
 module Decks.Server.Types where
 
-import           Decks.Document                 ( SrcRange )
-import           Decks.Utils                    ( Html )
-
 import           Data.Aeson                     ( ToJSON )
 import           Data.Text                      ( Text )
+import           Decks.Document                 ( SrcRange )
+import           Decks.Utils                    ( Html )
 
 --------------------------------------------------------------------------------
 

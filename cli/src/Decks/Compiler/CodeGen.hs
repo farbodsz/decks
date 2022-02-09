@@ -4,6 +4,13 @@
 --
 module Decks.Compiler.CodeGen where
 
+import           Control.Monad                  ( forM_
+                                                , when
+                                                )
+import           Control.Monad.Trans.State
+import qualified Data.HashMap.Lazy             as M
+import qualified Data.Text                     as T
+import qualified Data.Text.IO                  as TIO
 import           Decks.Compiler.CodeGen.Generate
 import           Decks.Compiler.CodeGen.Types
 import           Decks.Compiler.Error
@@ -11,15 +18,6 @@ import           Decks.Compiler.Grammar         ( DecksProgram(..)
                                                 , Identifier(..)
                                                 )
 import           Decks.Logging
-
-import           Control.Monad                  ( forM_
-                                                , when
-                                                )
-import           Control.Monad.Trans.State
-
-import qualified Data.HashMap.Lazy             as M
-import qualified Data.Text                     as T
-import qualified Data.Text.IO                  as TIO
 
 --------------------------------------------------------------------------------
 

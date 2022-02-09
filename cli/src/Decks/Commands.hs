@@ -5,7 +5,6 @@
 module Decks.Commands where
 
 import           Decks.Utils                    ( URL )
-
 import           Options.Applicative
 
 --------------------------------------------------------------------------------

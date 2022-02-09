@@ -4,11 +4,10 @@
 --
 module Decks.Compiler.CodeGen.Tagging where
 
-import           Decks.Compiler.CodeGen.Attributes
-import           Decks.Compiler.Grammar
-
 import           Control.Monad                  ( liftM2 )
 import qualified Data.Text                     as T
+import           Decks.Compiler.CodeGen.Attributes
+import           Decks.Compiler.Grammar
 import           Text.Megaparsec.Pos
 
 --------------------------------------------------------------------------------
