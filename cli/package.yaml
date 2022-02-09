@@ -26,6 +26,7 @@ dependencies:
   - time
   - transformers
   - unordered-containers
+  - wai-cors
   - warp
 
 default-extensions:

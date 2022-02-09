@@ -12,6 +12,7 @@ import           Decks.Server.API               ( DecksAPI )
 import           Decks.Server.Types
 import           Decks.Utils                    ( URL )
 import           Network.Wai.Handler.Warp       ( run )
+import           Network.Wai.Middleware.Cors
 import           Servant
 import           System.Directory               ( doesFileExist )
 
@@ -27,12 +28,12 @@ runServer path frontUrl = do
         <> (T.pack . show) serverPort
         <> "..."
     logMsg LogInfo $ "Using frontend at " <> (T.pack . show) frontUrl
-    run 8081 (app path frontUrl)
+    run serverPort (app path frontUrl)
 
 --------------------------------------------------------------------------------
 
 app :: FilePath -> URL -> Application
-app path url = serve decksAPI (server path url)
+app path url = simpleCors $ serve decksAPI (server path url)
 
 decksAPI :: Proxy DecksAPI
 decksAPI = Proxy
@@ -43,6 +44,6 @@ server path frontUrl = do
     content <- if fExists
         then liftIO $ Just <$> TIO.readFile path
         else pure Nothing
-    pure $ addHeader frontUrl $ Presentation content
+    pure $ Presentation content
 
 --------------------------------------------------------------------------------
