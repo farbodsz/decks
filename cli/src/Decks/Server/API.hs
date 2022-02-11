@@ -7,13 +7,16 @@
 --
 module Decks.Server.API where
 
-import           Decks.Server.Types             ( Presentation )
 import           Servant
+import           Servant.API.WebSocket          ( WebSocket )
 
 --------------------------------------------------------------------------------
 
 type DecksAPI
-    = "decks"
-    :> Get '[JSON] Presentation
+  = "decks"
+  :> WebSocket
+
+decksAPI :: Proxy DecksAPI
+decksAPI = Proxy
 
 --------------------------------------------------------------------------------
