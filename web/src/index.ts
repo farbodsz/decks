@@ -1,8 +1,20 @@
 //------------------------------------------------------------------------------
+// Types
+//------------------------------------------------------------------------------
+
+/**
+ * Return type of Reveal.getIndices().
+ */
+interface SlideIndices {
+  h: number;
+  v: number;
+}
+
+//------------------------------------------------------------------------------
 // Variables and init
 //------------------------------------------------------------------------------
 
-const BACKEND_URL = "http://localhost:8081/decks";
+const HOST = "localhost:8081/decks";
 
 /**
  * Editing mode
@@ -30,10 +42,10 @@ function revealInit() {
     // @ts-ignore
     disableLayout: true,
   });
-  console.log("Reveal initialized");
+  console.log("[reveal] Reveal initialized");
 }
 
-function revealRefresh(currSlide: { h: number; v: number }) {
+function revealRefresh(currSlide: SlideIndices) {
   Reveal.sync();
   Reveal.slide(currSlide.h, currSlide.v);
 }
@@ -46,30 +58,56 @@ function revealRefresh(currSlide: { h: number; v: number }) {
  * Replaces the HTML presentation with the one loaded from the backend.
  */
 function editorLoadContent() {
-  console.log("Loading content");
+  console.log("[editor] Loading content");
   const currSlide = Reveal.getIndices();
 
-  fetch(BACKEND_URL)
-    .then((response) => response.json())
-    .then((data) => {
-      const contentContainer = document.getElementById("editor-content");
-      if (!contentContainer) {
-        console.error("No content container found");
-        return;
-      }
+  // Setup WebSocket
+  console.log("[ws] Creating WebSocket...");
+  const webSocket = new WebSocket("ws://" + HOST);
 
-      contentContainer.innerHTML = data;
-      revealRefresh(currSlide);
-      editorSetupEditClicks();
-    })
-    .catch((error) => console.error("Error " + error.message));
+  webSocket.onopen = function () {
+    console.log("[ws] WebSocket connection opened");
+    webSocket.onmessage = function (event: MessageEvent<any>) {
+      editorSetContent(event.data?.trim(), currSlide);
+      console.log(event.data); // TODO: temp
+    };
+  };
+
+  webSocket.onclose = function (event: CloseEvent) {
+    console.log("[ws] WebSocket connection closed");
+    console.log(event.code);
+    console.log(event.reason);
+  };
+
+  webSocket.onerror = function (event: Event) {
+    console.log("[ws] WebSocket error");
+    console.log(event);
+  };
+}
+
+/**
+ * Sets the presentation data to the editor content GUI.
+ *
+ * This should be invoked the first time the presentation content is read from
+ * the backend.
+ */
+function editorSetContent(data: string, currSlide: SlideIndices) {
+  const contentContainer = document.getElementById("editor-content");
+  if (!contentContainer) {
+    console.error("No content container found");
+    return;
+  }
+
+  contentContainer.innerHTML = data;
+  revealRefresh(currSlide);
+  editorSetupEditClicks();
 }
 
 /**
  * Adds onclick events for all elements, to make them editable on click.
  */
 function editorSetupEditClicks() {
-  console.log("Setting up clicks");
+  console.log("[editor] Setting up clicks");
   const container = document.querySelector("#editor-content")!;
 
   // Limit elements that can be edited using two criteria:
@@ -103,7 +141,7 @@ function editorUpdateMode(editable: boolean) {
  */
 function editorSave() {
   const content = document.getElementById("editor-content")?.innerHTML;
-  console.log(content);
+  console.log(content); // TODO:
 }
 
 //------------------------------------------------------------------------------
