@@ -22,6 +22,11 @@ const HOST = "localhost:8081/decks";
 let editorEditable = false;
 
 /**
+ * Slide indices for the slide currently being viewed.
+ */
+let currSlide: SlideIndices = { h: 0, v: 0 };
+
+/**
  * Initializes the Decks UI
  */
 function initDecks() {
@@ -45,7 +50,7 @@ function revealInit() {
   console.log("[reveal] Reveal initialized");
 }
 
-function revealRefresh(currSlide: SlideIndices) {
+function revealRefresh() {
   Reveal.sync();
   Reveal.slide(currSlide.h, currSlide.v);
 }
@@ -59,7 +64,7 @@ function revealRefresh(currSlide: SlideIndices) {
  */
 function editorLoadContent() {
   console.log("[editor] Loading content");
-  const currSlide = Reveal.getIndices();
+  currSlide = Reveal.getIndices();
 
   // Setup WebSocket
   console.log("[ws] Creating WebSocket...");
@@ -75,7 +80,7 @@ function editorLoadContent() {
       var cleanedContent = received.replace(/\\"/g, '"');
       cleanedContent = received.substring(1, received.length - 3);
 
-      editorSetContent(cleanedContent, currSlide);
+      editorSetContent(cleanedContent);
     };
   };
 
@@ -97,7 +102,7 @@ function editorLoadContent() {
  * This should be invoked the first time the presentation content is read from
  * the backend.
  */
-function editorSetContent(data: string, currSlide: SlideIndices) {
+function editorSetContent(data: string) {
   const contentContainer = document.getElementById("editor-content");
   if (!contentContainer) {
     console.error("No content container found");
@@ -105,7 +110,7 @@ function editorSetContent(data: string, currSlide: SlideIndices) {
   }
 
   contentContainer.innerHTML = data;
-  revealRefresh(currSlide);
+  revealRefresh();
   editorSetupEditClicks();
 }
 
@@ -137,6 +142,7 @@ function editorSetupEditClicks() {
 }
 
 function editorUpdateMode(editable: boolean) {
+  currSlide = Reveal.getIndices();
   editorEditable = editable;
   const statusTxt = document.getElementById("status-mode")!;
   statusTxt.textContent = editable ? "Editing mode" : "Previewing mode";
