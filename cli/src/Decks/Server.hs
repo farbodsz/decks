@@ -7,9 +7,11 @@ module Decks.Server where
 
 import           Control.Concurrent             ( threadDelay )
 import           Control.Monad                  ( forever )
+import           Control.Monad.Extra            ( whenM )
 import           Control.Monad.IO.Class
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
+import           Data.Time
 import           Decks.Logging
 import           Decks.Server.API
 import           Decks.Server.Types
@@ -18,7 +20,9 @@ import           Network.Wai.Handler.Warp       ( run )
 import           Network.Wai.Middleware.Cors
 import           Network.WebSockets      hiding ( serverPort )
 import           Servant
-import           System.Directory               ( doesFileExist )
+import           System.Directory               ( doesFileExist
+                                                , getModificationTime
+                                                )
 
 --------------------------------------------------------------------------------
 
@@ -37,13 +41,12 @@ runServer path frontUrl = do
 --------------------------------------------------------------------------------
 
 -- | Number of seconds to wait between pinging via WebSocket.
-wsInterval :: Int
-wsInterval = 10
+wsPingInterval :: Int
+wsPingInterval = 60
 
--- | Number of /microseconds/ to delay the server thread for, between sending
--- messages.
-serverInterval :: Int
-serverInterval = 1 * 1000000
+-- | Number of seconds to delay the server thread for, between sending messages.
+wsUpdateInterval :: Int
+wsUpdateInterval = 1
 
 --------------------------------------------------------------------------------
 
@@ -54,16 +57,33 @@ app path = simpleCors $ serve decksAPI (server path)
 server :: FilePath -> Server DecksAPI
 server path = streamData
   where
-    streamData :: (MonadIO m) => Connection -> m ()
-    streamData conn = do
-        fExists <- liftIO $ doesFileExist path
-        content <- if fExists
-            then liftIO $ Just <$> TIO.readFile path
-            else pure Nothing
-        let pres = Presentation content
+    streamData :: MonadIO m => Connection -> m ()
+    streamData conn =
+        liftIO $ withPingThread conn wsPingInterval (pure ()) $ forever $ do
+            whenM shouldUpdateFrontend $ do
+                content <- liftIO $ Just <$> TIO.readFile path
+                sendTextData conn (Presentation content)
 
-        liftIO $ withPingThread conn wsInterval (pure ()) $ forever $ do
-            sendTextData conn pres
-            threadDelay serverInterval
+            threadDelay (wsUpdateInterval * 1000000)
+
+    shouldUpdateFrontend :: IO Bool
+    shouldUpdateFrontend = do
+        fileExists <- doesFileExist path
+        if fileExists
+            then do
+                modTime <- getModificationTime path
+                curTime <- getCurrentTime
+
+                -- Decks output was last checked now minus the update interval
+                let lastCheckedTime = addUTCTime
+                        ( secondsToNominalDiffTime
+                        . negate
+                        . fromIntegral
+                        $ wsUpdateInterval
+                        )
+                        curTime
+                pure $ modTime > lastCheckedTime
+            else pure False
+
 
 --------------------------------------------------------------------------------
