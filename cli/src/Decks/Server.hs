@@ -41,8 +41,11 @@ runServer path frontUrl = do
 --------------------------------------------------------------------------------
 
 -- | Number of seconds to wait between pinging via WebSocket.
+--
+-- When no message is sent or received within this timeframe, the connection is
+-- timed out and closes.
 wsPingInterval :: Int
-wsPingInterval = 60
+wsPingInterval = 5 * 60
 
 -- | Number of seconds to delay the server thread for, between sending messages.
 wsUpdateInterval :: Int
