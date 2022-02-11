@@ -68,8 +68,14 @@ function editorLoadContent() {
   webSocket.onopen = function () {
     console.log("[ws] WebSocket connection opened");
     webSocket.onmessage = function (event: MessageEvent<any>) {
-      editorSetContent(event.data?.trim(), currSlide);
-      console.log(event.data); // TODO: temp
+      console.log("[ws] Received message");
+
+      // Remove quotations and line breaks
+      let received = event.data.trim();
+      var cleanedContent = received.replace(/\\"/g, '"');
+      cleanedContent = received.substring(1, received.length - 3);
+
+      editorSetContent(cleanedContent, currSlide);
     };
   };
 
