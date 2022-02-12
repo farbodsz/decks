@@ -15,13 +15,17 @@ import           Text.Megaparsec
 --------------------------------------------------------------------------------
 
 instance FromJSON Pos
+instance ToJSON Pos
 
 instance FromJSON SourcePos where
     parseJSON = withObject "SourcePos" $ \v ->
         SourcePos <$> (v .: "path") <*> (v .: "line") <*> (v .: "col")
 
+instance ToJSON SourcePos where
+    toJSON (SourcePos path line col) =
+        object ["path" .= path, "line" .= line, "col" .= col]
+
 -- | Start and end positions in a document.
---
 data SrcRange = SrcRange
     { rangeStart :: SourcePos
     , rangeEnd   :: SourcePos
@@ -29,5 +33,6 @@ data SrcRange = SrcRange
     deriving (Eq, Generic, Show)
 
 instance FromJSON SrcRange
+instance ToJSON SrcRange
 
 --------------------------------------------------------------------------------

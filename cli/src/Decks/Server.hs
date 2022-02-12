@@ -6,6 +6,7 @@
 module Decks.Server where
 
 import           Control.Concurrent             ( threadDelay )
+import           Control.Concurrent.Async       ( race_ )
 import           Control.Monad                  ( forever )
 import           Control.Monad.Extra            ( whenM )
 import           Control.Monad.IO.Class
@@ -41,9 +42,6 @@ runServer path frontUrl = do
 --------------------------------------------------------------------------------
 
 -- | Number of seconds to wait between pinging via WebSocket.
---
--- When no message is sent or received within this timeframe, the connection is
--- timed out and closes.
 wsPingInterval :: Int
 wsPingInterval = 30
 
@@ -58,16 +56,21 @@ app :: FilePath -> Application
 app path = simpleCors $ serve decksAPI (server path)
 
 server :: FilePath -> Server DecksAPI
-server path = streamData
+server path = runWebSocket
   where
-    streamData :: MonadIO m => Connection -> m ()
-    streamData conn =
-        liftIO $ withPingThread conn wsPingInterval (pure ()) $ forever $ do
-            whenM shouldUpdateFrontend $ do
-                content <- liftIO $ Just <$> TIO.readFile path
-                sendTextData conn (Presentation content)
+    runWebSocket :: MonadIO m => Connection -> m ()
+    runWebSocket conn =
+        liftIO $ withPingThread conn wsPingInterval (pure ()) $ race_
+            (handlePushes conn)
+            (handlePulls conn)
 
-            threadDelay (wsUpdateInterval * 1000000)
+    -- | Sends updates to the frontend if the presentation DSL has changed.
+    handlePushes :: Connection -> IO ()
+    handlePushes conn = forever $ do
+        whenM shouldUpdateFrontend $ do
+            content <- Just <$> TIO.readFile path
+            sendTextData conn (Presentation content)
+        threadDelay (wsUpdateInterval * 1000000)
 
     shouldUpdateFrontend :: IO Bool
     shouldUpdateFrontend = do
@@ -76,7 +79,6 @@ server path = streamData
             then do
                 modTime <- getModificationTime path
                 curTime <- getCurrentTime
-
                 -- Decks output was last checked now minus the update interval
                 let lastCheckedTime = addUTCTime
                         ( secondsToNominalDiffTime
@@ -88,5 +90,23 @@ server path = streamData
                 pure $ modTime > lastCheckedTime
             else pure False
 
+    -- | Receives and processes notifications from the frontend.
+    handlePulls :: Connection -> IO ()
+    handlePulls conn = forever $ do
+        (ReceivedNotification e_notif) <- receiveData conn
+        case e_notif of
+            Left err ->
+                logMsg LogError
+                    $  "Unable to process received notification: "
+                    <> T.pack err
+            Right res -> applyNotif res
+        threadDelay (wsUpdateInterval * 1000000)
+
+    applyNotif :: Notification -> IO ()
+    applyNotif notif = do
+        logMsg LogInfo
+            $  "Got update from Decks frontend:\n"
+            <> (T.pack . show) notif
+        -- TODO: Apply changes to the DSL properly
 
 --------------------------------------------------------------------------------
