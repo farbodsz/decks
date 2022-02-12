@@ -45,7 +45,7 @@ runServer path frontUrl = do
 -- When no message is sent or received within this timeframe, the connection is
 -- timed out and closes.
 wsPingInterval :: Int
-wsPingInterval = 5 * 60
+wsPingInterval = 30
 
 -- | Number of seconds to delay the server thread for, between sending messages.
 wsUpdateInterval :: Int
