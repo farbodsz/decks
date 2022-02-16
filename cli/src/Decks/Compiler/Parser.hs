@@ -13,6 +13,7 @@ import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
 import           Decks.Compiler.AstShow
 import           Decks.Compiler.Grammar
+import           Decks.Document                 ( SrcRange(..) )
 import           Decks.Logging
 import           Decks.Utils
 import           Text.Megaparsec

@@ -8,12 +8,7 @@ import           Control.Applicative            ( (<|>) )
 import           Data.Hashable                  ( Hashable )
 import           Data.List                      ( union )
 import           Data.Text                      ( Text )
-import           Text.Megaparsec                ( SourcePos )
-
---------------------------------------------------------------------------------
-
-data SrcRange = SrcRange SourcePos SourcePos
-    deriving (Eq, Show)
+import           Decks.Document                 ( SrcRange )
 
 --------------------------------------------------------------------------------
 

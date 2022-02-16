@@ -8,6 +8,7 @@ import           Control.Monad                  ( liftM2 )
 import qualified Data.Text                     as T
 import           Decks.Compiler.CodeGen.Attributes
 import           Decks.Compiler.Grammar
+import           Decks.Document                 ( SrcRange(..) )
 import           Text.Megaparsec.Pos
 
 --------------------------------------------------------------------------------
