@@ -10,7 +10,7 @@ import           Options.Applicative
 --------------------------------------------------------------------------------
 
 data Opts = Opts
-    { optDirPath     :: FilePath
+    { optDslPath     :: FilePath
     , optOutPath     :: FilePath
     , optFrontendUrl :: URL
     , optWatch       :: Bool
@@ -25,10 +25,10 @@ pOpts =
     Opts
         <$> strOption
                 (  long "input"
-                <> metavar "INPUT_DIR"
+                <> metavar "INPUT_FILE"
                 <> showDefault
-                <> value defaultInputDir
-                <> help "Directory path containing a Decks file to parse"
+                <> value defaultInputFile
+                <> help "File path of the Decks DSL file to parse"
                 )
         <*> strOption
                 (  long "output"
@@ -56,8 +56,8 @@ pOpts =
 
 --------------------------------------------------------------------------------
 
-defaultInputDir :: FilePath
-defaultInputDir = "."
+defaultInputFile :: FilePath
+defaultInputFile = "./presentation.decks"
 
 defaultOutputFile :: FilePath
 defaultOutputFile = "index.html"

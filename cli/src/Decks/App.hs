@@ -18,7 +18,9 @@ import           Decks.Logging
 import           Decks.Server                   ( runServer )
 import           System.Directory
 import           System.FSNotify
-import           System.FilePath                ( takeExtension )
+import           System.FilePath                ( takeDirectory
+                                                , takeExtension
+                                                )
 
 --------------------------------------------------------------------------------
 
@@ -34,20 +36,23 @@ main = do
 -- file(s) are only read once.
 watch :: Opts -> IO ()
 watch Opts {..} = if not optWatch
-    then getDecksFromDir optDirPath >>= mapM_ (compile outPath optVerbose)
+    then compile outPath optVerbose dslPath
     else withManager $ \mgr -> do
-        logMsg LogInfo $ "Watching directory " <> T.pack optDirPath
+        let dirPath = takeDirectory optDslPath
+        logMsg LogInfo $ "Watching directory " <> T.pack dirPath
 
         -- Process once before watching for further changes in the background
-        getDecksFromDir optDirPath >>= mapM_ (compile outPath optVerbose)
+        compile outPath optVerbose dslPath
         _ <- watchDir mgr
-                      optDirPath
+                      dirPath
                       shouldCheckFile
-                      (processEvent optDirPath outPath optVerbose)
+                      (processEvent dirPath dslPath outPath optVerbose)
 
         -- Sleep forever (until interrupted)
         forever $ threadDelay 1000000
-    where outPath = HtmlOutput optOutPath
+  where
+    dslPath = DecksDocument optDslPath
+    outPath = HtmlOutput optOutPath
 
 -- | A list of Decks files in the directory.
 getDecksFromDir :: FilePath -> IO [DecksDocument]
@@ -61,10 +66,12 @@ shouldCheckFile _                   = False
 isDecksFile :: FilePath -> Bool
 isDecksFile fp = takeExtension fp == ".decks"
 
-processEvent :: FilePath -> HtmlOutput -> Bool -> Event -> IO ()
-processEvent _ outPath verbose ev@(Modified file _ _) = do
+processEvent
+    :: FilePath -> DecksDocument -> HtmlOutput -> Bool -> Event -> IO ()
+processEvent _dirPath _dslPath outPath verbose ev@(Modified file _ _) = do
+    -- TODO: check if the file that has changed is the one we're watching
     logEvent ev
     compile outPath verbose (DecksDocument file)
-processEvent _ _ _ _ = pure ()
+processEvent _ _ _ _ _ = pure ()
 
 --------------------------------------------------------------------------------
