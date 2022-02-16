@@ -14,6 +14,12 @@ import           Text.Megaparsec
 
 --------------------------------------------------------------------------------
 
+newtype DecksDocument = DecksDocument FilePath
+    deriving Show
+
+newtype HtmlOutput = HtmlOutput FilePath
+    deriving Show
+
 instance FromJSON Pos
 instance ToJSON Pos
 

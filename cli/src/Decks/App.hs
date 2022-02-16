@@ -11,6 +11,9 @@ import           Control.Monad                  ( forever )
 import qualified Data.Text                     as T
 import           Decks.Commands
 import           Decks.Compiler                 ( compile )
+import           Decks.Document                 ( DecksDocument(..)
+                                                , HtmlOutput(HtmlOutput)
+                                                )
 import           Decks.Logging
 import           Decks.Server                   ( runServer )
 import           System.Directory
@@ -22,31 +25,34 @@ import           System.FilePath                ( takeExtension )
 main :: IO ()
 main = do
     opts <- parseCmd
-    concurrently_ (runServer (optOutPath opts) (optFrontendUrl opts))
-                  (watch opts)
+    concurrently_
+        (runServer (HtmlOutput $ optOutPath opts) (optFrontendUrl opts))
+        (watch opts)
 
 -- | watch @directory shouldWatch@ continuously watches for Decks files,
 -- updating as they are modified, if @shouldWatch@ is True. Otherwise, the
 -- file(s) are only read once.
 watch :: Opts -> IO ()
 watch Opts {..} = if not optWatch
-    then getDecksFromDir optDirPath >>= mapM_ (compile optOutPath optVerbose)
+    then getDecksFromDir optDirPath >>= mapM_ (compile outPath optVerbose)
     else withManager $ \mgr -> do
         logMsg LogInfo $ "Watching directory " <> T.pack optDirPath
 
         -- Process once before watching for further changes in the background
-        getDecksFromDir optDirPath >>= mapM_ (compile optOutPath optVerbose)
+        getDecksFromDir optDirPath >>= mapM_ (compile outPath optVerbose)
         _ <- watchDir mgr
                       optDirPath
                       shouldCheckFile
-                      (processEvent optDirPath optOutPath optVerbose)
+                      (processEvent optDirPath outPath optVerbose)
 
         -- Sleep forever (until interrupted)
         forever $ threadDelay 1000000
+    where outPath = HtmlOutput optOutPath
 
 -- | A list of Decks files in the directory.
-getDecksFromDir :: FilePath -> IO [FilePath]
-getDecksFromDir = fmap (filter isDecksFile) . getDirectoryContents
+getDecksFromDir :: FilePath -> IO [DecksDocument]
+getDecksFromDir =
+    fmap (map DecksDocument . filter isDecksFile) . getDirectoryContents
 
 shouldCheckFile :: Event -> Bool
 shouldCheckFile (Modified file _ _) = isDecksFile file
@@ -55,10 +61,10 @@ shouldCheckFile _                   = False
 isDecksFile :: FilePath -> Bool
 isDecksFile fp = takeExtension fp == ".decks"
 
-processEvent :: FilePath -> FilePath -> Bool -> Event -> IO ()
+processEvent :: FilePath -> HtmlOutput -> Bool -> Event -> IO ()
 processEvent _ outPath verbose ev@(Modified file _ _) = do
     logEvent ev
-    compile outPath verbose file
+    compile outPath verbose (DecksDocument file)
 processEvent _ _ _ _ = pure ()
 
 --------------------------------------------------------------------------------

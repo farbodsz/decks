@@ -13,6 +13,9 @@ import           Control.Monad.IO.Class
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Time
+import           Decks.Document                 ( HtmlOutput(..)
+                                                , docEditTextRange
+                                                )
 import           Decks.Logging
 import           Decks.Server.API
 import           Decks.Server.Types
@@ -30,14 +33,14 @@ import           System.Directory               ( doesFileExist
 serverPort :: Int
 serverPort = 8081
 
-runServer :: FilePath -> URL -> IO ()
-runServer path frontUrl = do
+runServer :: HtmlOutput -> URL -> IO ()
+runServer output frontUrl = do
     logMsg LogInfo
         $  "Starting Decks server on port "
         <> (T.pack . show) serverPort
         <> "..."
     logMsg LogInfo $ "Using frontend at " <> (T.pack . show) frontUrl
-    run serverPort (app path)
+    run serverPort (app output)
 
 --------------------------------------------------------------------------------
 
@@ -52,11 +55,11 @@ wsUpdateInterval = 1
 --------------------------------------------------------------------------------
 
 -- | The WAI application serving the Decks backend.
-app :: FilePath -> Application
+app :: HtmlOutput -> Application
 app path = simpleCors $ serve decksAPI (server path)
 
-server :: FilePath -> Server DecksAPI
-server path = runWebSocket
+server :: HtmlOutput -> Server DecksAPI
+server (HtmlOutput path) = runWebSocket
   where
     runWebSocket :: MonadIO m => Connection -> m ()
     runWebSocket conn =

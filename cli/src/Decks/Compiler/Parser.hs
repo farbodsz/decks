@@ -13,7 +13,9 @@ import qualified Data.Text.IO                  as TIO
 import           Data.Void                      ( Void )
 import           Decks.Compiler.AstShow
 import           Decks.Compiler.Grammar
-import           Decks.Document                 ( SrcRange(..) )
+import           Decks.Document                 ( DecksDocument(DecksDocument)
+                                                , SrcRange(..)
+                                                )
 import           Decks.Logging
 import           Decks.Utils
 import           Text.Megaparsec
@@ -27,8 +29,8 @@ type Parser = Parsec Void Text
 
 -- TODO: avoid IO here - return Either type so we can compose easily with
 -- runCodeGen?
-parseDecks :: FilePath -> Bool -> IO (Maybe DecksProgram)
-parseDecks path verbose = do
+parseDecks :: DecksDocument -> Bool -> IO (Maybe DecksProgram)
+parseDecks (DecksDocument path) verbose = do
     contents <- T.pack <$> readFile path
     case runParser pProgram path contents of
         Left bundle -> do
