@@ -185,7 +185,7 @@ function editorSetupEditClicks() {
       currNotification = {
         notifType: "NotifTextChanged",
         notifSrc: range,
-        notifNewVal: el.innerText,
+        notifNewVal: br2nl(el.innerText),
       };
     };
   });
@@ -221,6 +221,10 @@ function haskellTupleToJs(str: string): number[] {
   str = str.substring(2, str.length - 2);
   const [sstart, send] = str.split(":");
   return [parseInt(sstart), parseInt(send)];
+}
+
+function br2nl(str: string): string {
+  return str.replace(/<br\s*\/?>/gm, "\n");
 }
 
 function editorUpdateMode(editable: boolean) {

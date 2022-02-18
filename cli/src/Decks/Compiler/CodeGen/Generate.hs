@@ -41,7 +41,7 @@ genStmt (DecksString src txt) = genElement
     $ DecksElement literalTemplateIdentifier elemProps elemStmts
   where
     elemProps = tagElemRange src mempty
-    elemStmts = [DecksLiteral txt]
+    elemStmts = [DecksLiteral $ T.replace "\n" "<br>" txt]
 genStmt (DecksLiteral txt) = pure txt
 genStmt (DecksComment _  ) = pure mempty
 
