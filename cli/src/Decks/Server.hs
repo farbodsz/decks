@@ -107,11 +107,7 @@ server (DecksDocument dslPath) (HtmlOutput outPath) = runWebSocket
         threadDelay (wsUpdateInterval * 1000000)
 
     handleNotif :: Notification -> IO ()
-    handleNotif notif@Notification {..} = do
-        logMsg LogInfo
-            $  "Got update from Decks frontend:\n"
-            <> (T.pack . show) notif
-
+    handleNotif Notification {..} = do
         case notifType of
             NotifTextChanged -> docEditTextRange dslPath notifSrc notifNewVal
 

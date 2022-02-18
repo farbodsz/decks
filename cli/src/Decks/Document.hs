@@ -56,9 +56,7 @@ instance ToJSON SrcRange
 docEditTextRange :: FilePath -> SrcRange -> Text -> IO ()
 docEditTextRange path range newVal = do
     content <- TIO.readFile path
-    print content
     let newContent = editTextRange content range newVal
-    print newContent
     TIO.writeFile path newContent
 
 --------------------------------------------------------------------------------
