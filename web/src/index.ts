@@ -200,27 +200,27 @@ function elGetDecksRange(el: HTMLElement): DecksSrcRange | null {
     return null;
   }
 
-  const [startl, startc] = haskellTupleToJs(start);
-  const [endl, endc] = haskellTupleToJs(end);
+  const parseColonSep = (str: string): number[] => {
+    str = str.substring(2, str.length - 2);
+    const [sstart, send] = str.split(":");
+    return [parseInt(sstart), parseInt(send)];
+  };
+
+  const [startl, startc] = parseColonSep(start);
+  const [endl, endc] = parseColonSep(end);
 
   return {
     rangeStart: {
-      path: "", // FIXME:
+      path: "", // TODO
       line: startl,
       col: startc,
     },
     rangeEnd: {
-      path: "", // FIXME:
+      path: "", // TODO
       line: endl,
       col: endc,
     },
   };
-}
-
-function haskellTupleToJs(str: string): number[] {
-  str = str.substring(2, str.length - 2);
-  const [sstart, send] = str.split(":");
-  return [parseInt(sstart), parseInt(send)];
 }
 
 function br2nl(str: string): string {
