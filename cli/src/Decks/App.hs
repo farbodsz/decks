@@ -12,7 +12,7 @@ import qualified Data.Text                     as T
 import           Decks.Commands
 import           Decks.Compiler                 ( compile )
 import           Decks.Document                 ( DecksDocument(..)
-                                                , HtmlOutput(HtmlOutput)
+                                                , HtmlOutput
                                                 )
 import           Decks.Logging
 import           Decks.Server                   ( runServer )
@@ -28,7 +28,7 @@ main :: IO ()
 main = do
     opts <- parseCmd
     concurrently_
-        (runServer (HtmlOutput $ optOutPath opts) (optFrontendUrl opts))
+        (runServer (optOutPath opts) (optFrontendUrl opts))
         (watch opts)
 
 -- | watch @directory shouldWatch@ continuously watches for Decks files,
@@ -36,23 +36,21 @@ main = do
 -- file(s) are only read once.
 watch :: Opts -> IO ()
 watch Opts {..} = if not optWatch
-    then compile outPath optVerbose dslPath
+    then compile optOutPath optVerbose optDslPath
     else withManager $ \mgr -> do
-        let dirPath = takeDirectory optDslPath
+        let dirPath = takeDirectory (unDecksDoc optDslPath)
         logMsg LogInfo $ "Watching directory " <> T.pack dirPath
 
         -- Process once before watching for further changes in the background
-        compile outPath optVerbose dslPath
-        _ <- watchDir mgr
-                      dirPath
-                      shouldCheckFile
-                      (processEvent dirPath dslPath outPath optVerbose)
+        compile optOutPath optVerbose optDslPath
+        _ <- watchDir
+            mgr
+            dirPath
+            shouldCheckFile
+            (processEvent dirPath optDslPath optOutPath optVerbose)
 
         -- Sleep forever (until interrupted)
         forever $ threadDelay 1000000
-  where
-    dslPath = DecksDocument optDslPath
-    outPath = HtmlOutput optOutPath
 
 -- | A list of Decks files in the directory.
 getDecksFromDir :: FilePath -> IO [DecksDocument]

@@ -13,12 +13,16 @@ import           GHC.Generics                   ( Generic )
 import           Text.Megaparsec
 
 --------------------------------------------------------------------------------
+-- Types of document
 
-newtype DecksDocument = DecksDocument FilePath
+newtype DecksDocument = DecksDocument { unDecksDoc :: FilePath }
     deriving (Eq, Show)
 
 newtype HtmlOutput = HtmlOutput FilePath
     deriving (Eq, Show)
+
+--------------------------------------------------------------------------------
+-- Types of properties
 
 instance FromJSON Pos
 instance ToJSON Pos

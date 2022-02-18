@@ -4,14 +4,17 @@
 --
 module Decks.Commands where
 
+import           Decks.Document                 ( DecksDocument(DecksDocument)
+                                                , HtmlOutput(HtmlOutput)
+                                                )
 import           Decks.Utils                    ( URL )
 import           Options.Applicative
 
 --------------------------------------------------------------------------------
 
 data Opts = Opts
-    { optDslPath     :: FilePath
-    , optOutPath     :: FilePath
+    { optDslPath     :: DecksDocument
+    , optOutPath     :: HtmlOutput
     , optFrontendUrl :: URL
     , optWatch       :: Bool
     , optVerbose     :: Bool
@@ -23,20 +26,22 @@ parseCmd = execParser $ info (pOpts <**> helper) (fullDesc <> header "Decks")
 pOpts :: Parser Opts
 pOpts =
     Opts
-        <$> strOption
+        <$> (DecksDocument <$> strOption
                 (  long "input"
                 <> metavar "INPUT_FILE"
                 <> showDefault
                 <> value defaultInputFile
                 <> help "File path of the Decks DSL file to parse"
                 )
-        <*> strOption
+            )
+        <*> (HtmlOutput <$> strOption
                 (  long "output"
                 <> metavar "OUTPUT_FILE"
                 <> showDefault
                 <> value defaultOutputFile
                 <> help "Destination of the output HTML file"
                 )
+            )
         <*> strOption
                 (  long "frontend"
                 <> metavar "FRONTEND_URL"
