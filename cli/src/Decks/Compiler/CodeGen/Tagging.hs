@@ -4,11 +4,11 @@
 --
 module Decks.Compiler.CodeGen.Tagging where
 
-import           Decks.Compiler.CodeGen.Attributes
-import           Decks.Compiler.Grammar
-
 import           Control.Monad                  ( liftM2 )
 import qualified Data.Text                     as T
+import           Decks.Compiler.CodeGen.Attributes
+import           Decks.Compiler.Grammar
+import           Decks.Document                 ( SrcRange(..) )
 import           Text.Megaparsec.Pos
 
 --------------------------------------------------------------------------------
@@ -21,9 +21,10 @@ tagElemRange (SrcRange start end) currProps = currProps
                    ]
     }
   where
-    mkPosStr = Just . T.pack . show . liftM2 (,)
-                                             (unPos . sourceLine)
-                                             (unPos . sourceColumn)
+    mkPosStr = Just . T.pack . (\(l, c) -> show l <> ":" <> show c) . liftM2
+        (,)
+        (unPos . sourceLine)
+        (unPos . sourceColumn)
 
 -- | Adds the @data-decks-class@ attribute to an element's props, using its
 -- current HTML classes.

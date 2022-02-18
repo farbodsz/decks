@@ -4,11 +4,10 @@ module ParserSpec
     ( spec
     ) where
 
-import           Decks.Compiler.Grammar
-import           Decks.Compiler.Parser
-
 import           Control.Monad                  ( forM_ )
 import qualified Data.Text.IO                  as TIO
+import           Decks.Compiler.Grammar
+import           Decks.Compiler.Parser
 import           System.Directory               ( getDirectoryContents )
 import           Test.Hspec
 import           Test.Hspec.Megaparsec

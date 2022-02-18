@@ -1,8 +1,42 @@
 //------------------------------------------------------------------------------
+// Types
+//------------------------------------------------------------------------------
+
+/**
+ * Return type of Reveal.getIndices().
+ */
+interface SlideIndices {
+  h: number;
+  v: number;
+}
+
+/**
+ * Notification sent from the frontend to the backend.
+ */
+interface DecksNotification {
+  notifType: DecksNotificationType;
+  notifSrc: DecksSrcRange;
+  notifNewVal: string;
+}
+
+type DecksNotificationType = "NotifTextChanged";
+
+interface DecksSrcRange {
+  rangeStart: DecksSourcePos;
+  rangeEnd: DecksSourcePos;
+}
+
+interface DecksSourcePos {
+  path: string;
+  line: number;
+  col: number;
+}
+
+//------------------------------------------------------------------------------
 // Variables and init
 //------------------------------------------------------------------------------
 
-const BACKEND_URL = "http://localhost:8081/decks";
+const HOST = "localhost:8081/decks";
 
 /**
  * Editing mode
@@ -10,11 +44,28 @@ const BACKEND_URL = "http://localhost:8081/decks";
 let editorEditable = false;
 
 /**
+ * Slide indices for the slide currently being viewed.
+ */
+let currSlide: SlideIndices = { h: 0, v: 0 };
+
+/**
+ * WebSocket connection.
+ */
+let webSocket: WebSocket | null;
+
+/**
+ * Notification representing the current edit made to the presentation, pending
+ * synchronisation with the backend. This may be null, if no edits have been
+ * made since the presentation was last synced with the backend.
+ */
+let currNotification: DecksNotification | null;
+
+/**
  * Initializes the Decks UI
  */
 function initDecks() {
   revealInit();
-  editorLoadContent();
+  editorSetupConnection();
 }
 
 //------------------------------------------------------------------------------
@@ -30,10 +81,10 @@ function revealInit() {
     // @ts-ignore
     disableLayout: true,
   });
-  console.log("Reveal initialized");
+  console.info("[reveal] Reveal initialized");
 }
 
-function revealRefresh(currSlide: { h: number; v: number }) {
+function revealRefresh() {
   Reveal.sync();
   Reveal.slide(currSlide.h, currSlide.v);
 }
@@ -43,33 +94,66 @@ function revealRefresh(currSlide: { h: number; v: number }) {
 //------------------------------------------------------------------------------
 
 /**
- * Replaces the HTML presentation with the one loaded from the backend.
+ * Creates a connection to the backend via WebSocket.
+ *
+ * When a WebSocket message is received, the HTML presentation content is
+ * updated.
  */
-function editorLoadContent() {
-  console.log("Loading content");
-  const currSlide = Reveal.getIndices();
+function editorSetupConnection() {
+  console.info("[editor] Loading content");
+  currSlide = Reveal.getIndices();
 
-  fetch(BACKEND_URL)
-    .then((response) => response.json())
-    .then((data) => {
-      const contentContainer = document.getElementById("editor-content");
-      if (!contentContainer) {
-        console.error("No content container found");
-        return;
-      }
+  // Setup WebSocket
+  console.info("[ws] Creating WebSocket...");
+  webSocket = new WebSocket("ws://" + HOST);
 
-      contentContainer.innerHTML = data;
-      revealRefresh(currSlide);
-      editorSetupEditClicks();
-    })
-    .catch((error) => console.error("Error " + error.message));
+  webSocket.onopen = function () {
+    console.info("[ws] WebSocket connection opened");
+    webSocket!.onmessage = function (event: MessageEvent<any>) {
+      console.info("[ws] Received message");
+
+      // Remove quotations and line breaks
+      let received = event.data.trim();
+      var cleanedContent = received.replace(/\\"/g, '"');
+      cleanedContent = received.substring(1, received.length - 3);
+
+      editorSetContent(cleanedContent);
+    };
+  };
+
+  webSocket.onclose = function (event: CloseEvent) {
+    console.info("[ws] WebSocket connection closed");
+    console.info(event);
+  };
+
+  webSocket.onerror = function (event: Event) {
+    console.error("[ws] WebSocket error");
+    console.error(event);
+  };
+}
+
+/**
+ * Sets the presentation data to the editor content GUI.
+ *
+ * This should be invoked the first time the presentation content is read from
+ * the backend.
+ */
+function editorSetContent(data: string) {
+  const contentContainer = document.getElementById("editor-content");
+  if (!contentContainer) {
+    console.error("No content container found");
+    return;
+  }
+
+  contentContainer.innerHTML = data;
+  revealRefresh();
+  editorSetupEditClicks();
 }
 
 /**
  * Adds onclick events for all elements, to make them editable on click.
  */
 function editorSetupEditClicks() {
-  console.log("Setting up clicks");
   const container = document.querySelector("#editor-content")!;
 
   // Limit elements that can be edited using two criteria:
@@ -88,11 +172,59 @@ function editorSetupEditClicks() {
     el.onblur = function () {
       el.setAttribute("contentEditable", "false");
       editorUpdateMode(false);
+      editorSendNotification(currNotification);
+    };
+
+    el.oninput = function (_: Event) {
+      const range = elGetDecksRange(el);
+      if (range == null) {
+        return;
+      }
+
+      // Update the current notification when the input has changed
+      currNotification = {
+        notifType: "NotifTextChanged",
+        notifSrc: range,
+        notifNewVal: el.innerText,
+      };
     };
   });
 }
 
+function elGetDecksRange(el: HTMLElement): DecksSrcRange | null {
+  const start = el.getAttribute("data-decks-start");
+  const end = el.getAttribute("data-decks-end");
+
+  if (start == null || end == null) {
+    console.error("[editor] No Decks range attributes found on the element.");
+    return null;
+  }
+
+  const [startl, startc] = haskellTupleToJs(start);
+  const [endl, endc] = haskellTupleToJs(end);
+
+  return {
+    rangeStart: {
+      path: "", // FIXME:
+      line: startl,
+      col: startc,
+    },
+    rangeEnd: {
+      path: "", // FIXME:
+      line: endl,
+      col: endc,
+    },
+  };
+}
+
+function haskellTupleToJs(str: string): number[] {
+  str = str.substring(2, str.length - 2);
+  const [sstart, send] = str.split(":");
+  return [parseInt(sstart), parseInt(send)];
+}
+
 function editorUpdateMode(editable: boolean) {
+  currSlide = Reveal.getIndices();
   editorEditable = editable;
   const statusTxt = document.getElementById("status-mode")!;
   statusTxt.textContent = editable ? "Editing mode" : "Previewing mode";
@@ -102,8 +234,32 @@ function editorUpdateMode(editable: boolean) {
  * Outputs the presentation HTML
  */
 function editorSave() {
-  const content = document.getElementById("editor-content")?.innerHTML;
-  console.log(content);
+  console.error("Not implemented!");
+  // TODO:
+  // console.log("[editor] Saving content");
+  // const content = document.getElementById("editor-content")?.innerHTML;
+  // console.log(content);
+}
+
+/**
+ * Sends a Notification to the backend via the WebSocket connection
+ */
+function editorSendNotification(notification: DecksNotification | null): void {
+  if (webSocket == null) {
+    return console.error(
+      "[ws] Tried to send notification, but connection is null."
+    );
+  }
+
+  if (notification == null) {
+    return console.error(
+      "[editor] Tried to send notification, but notification is null."
+    );
+  }
+
+  console.info("[editor] Sending notification:");
+  console.info(currNotification);
+  webSocket.send(JSON.stringify(notification));
 }
 
 //------------------------------------------------------------------------------

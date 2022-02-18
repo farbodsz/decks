@@ -11,7 +11,6 @@ import           Data.Time.Clock                ( UTCTime
                                                 , getCurrentTime
                                                 )
 import           Data.Time.Format
-
 import           System.Console.ANSI
 import           System.FSNotify                ( Event(..) )
 import           System.FilePath.Posix          ( takeFileName )

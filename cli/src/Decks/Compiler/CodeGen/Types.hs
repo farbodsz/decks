@@ -4,15 +4,13 @@
 --
 module Decks.Compiler.CodeGen.Types where
 
+import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
+import           Control.Monad.Trans.State
+import qualified Data.HashMap.Lazy             as M
+import           Data.Maybe
 import           Decks.Compiler.Error
 import           Decks.Compiler.Grammar
 import           Decks.Utils                    ( Html )
-
-import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
-import           Control.Monad.Trans.State
-
-import qualified Data.HashMap.Lazy             as M
-import           Data.Maybe
 
 --------------------------------------------------------------------------------
 

@@ -22,11 +22,14 @@ dependencies:
   - megaparsec
   - optparse-applicative
   - servant-server
+  - servant-websockets
   - text
   - time
   - transformers
   - unordered-containers
+  - wai-cors
   - warp
+  - websockets
 
 default-extensions:
   - GeneralizedNewtypeDeriving

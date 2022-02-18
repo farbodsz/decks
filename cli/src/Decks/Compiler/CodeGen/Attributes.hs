@@ -4,10 +4,9 @@
 --
 module Decks.Compiler.CodeGen.Attributes where
 
-import           Decks.Utils                    ( fromList )
-
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
+import           Decks.Utils                    ( fromList )
 
 --------------------------------------------------------------------------------
 
