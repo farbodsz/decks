@@ -69,12 +69,25 @@ pDefStmt =
         <*> (space *> char '=' *> space *> braced pContentTemplate)
 
 pString :: Parser DecksStmt
-pString = do
-    start <- getSourcePos
-    let singleLine = "\"" *> many (noneOf ['"', '\n', '\r']) <* "\""
-        multiLine  = "[[" *> many (noneOf ['[', ']']) <* "]]"
-    litContents <- T.strip . T.pack <$> (singleLine <|> multiLine)
+pString = pStringSingle <|> pStringMulti
+
+pStringSingle :: Parser DecksStmt
+pStringSingle = do
+    _           <- "\""
+    start       <- getSourcePos
+    litContents <- T.pack <$> many (noneOf ['"', '\n', '\r'])
     end         <- getSourcePos
+    _           <- "\""
+    pure $ DecksString (SrcRange start end) litContents
+
+pStringMulti :: Parser DecksStmt
+pStringMulti = do
+    _           <- "[["
+    start       <- getSourcePos
+    -- Strip to exclude leading/trailing newlines from multiline strings
+    litContents <- T.strip . T.pack <$> many (noneOf ['[', ']'])
+    end         <- getSourcePos
+    _           <- "]]"
     pure $ DecksString (SrcRange start end) litContents
 
 pComment :: Parser DecksStmt

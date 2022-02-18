@@ -21,9 +21,10 @@ tagElemRange (SrcRange start end) currProps = currProps
                    ]
     }
   where
-    mkPosStr = Just . T.pack . show . liftM2 (,)
-                                             (unPos . sourceLine)
-                                             (unPos . sourceColumn)
+    mkPosStr = Just . T.pack . (\(l, c) -> show l <> ":" <> show c) . liftM2
+        (,)
+        (unPos . sourceLine)
+        (unPos . sourceColumn)
 
 -- | Adds the @data-decks-class@ attribute to an element's props, using its
 -- current HTML classes.
