@@ -176,25 +176,51 @@ function editorSetupEditClicks() {
     };
 
     el.oninput = function (_: Event) {
+      const range = elGetDecksRange(el);
+      if (range == null) {
+        return;
+      }
+
       // Update the current notification when the input has changed
       currNotification = {
         notifType: "NotifTextChanged",
-        notifSrc: {
-          rangeStart: {
-            path: "", // FIXME:
-            line: 0, // FIXME:
-            col: 0, // FIXME:
-          },
-          rangeEnd: {
-            path: "", // FIXME:
-            line: 0, // FIXME:
-            col: 0, // FIXME:
-          },
-        },
+        notifSrc: range,
         notifNewVal: el.innerText,
       };
     };
   });
+}
+
+function elGetDecksRange(el: HTMLElement): DecksSrcRange | null {
+  const start = el.getAttribute("data-decks-start");
+  const end = el.getAttribute("data-decks-end");
+
+  if (start == null || end == null) {
+    console.error("[editor] No Decks range attributes found on the element.");
+    return null;
+  }
+
+  const [startl, startc] = haskellTupleToJs(start);
+  const [endl, endc] = haskellTupleToJs(end);
+
+  return {
+    rangeStart: {
+      path: "", // FIXME:
+      line: startl,
+      col: startc,
+    },
+    rangeEnd: {
+      path: "", // FIXME:
+      line: endl,
+      col: endc,
+    },
+  };
+}
+
+function haskellTupleToJs(str: string): number[] {
+  str = str.substring(2, str.length - 2);
+  const [sstart, send] = str.split(":");
+  return [parseInt(sstart), parseInt(send)];
 }
 
 function editorUpdateMode(editable: boolean) {

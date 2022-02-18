@@ -13,7 +13,8 @@ import           Control.Monad.IO.Class
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Time
-import           Decks.Document                 ( HtmlOutput(..)
+import           Decks.Document                 ( DecksDocument(DecksDocument)
+                                                , HtmlOutput(HtmlOutput)
                                                 , docEditTextRange
                                                 )
 import           Decks.Logging
@@ -33,14 +34,14 @@ import           System.Directory               ( doesFileExist
 serverPort :: Int
 serverPort = 8081
 
-runServer :: HtmlOutput -> URL -> IO ()
-runServer output frontUrl = do
+runServer :: DecksDocument -> HtmlOutput -> URL -> IO ()
+runServer dslPath outPath frontUrl = do
     logMsg LogInfo
         $  "Starting Decks server on port "
         <> (T.pack . show) serverPort
         <> "..."
     logMsg LogInfo $ "Using frontend at " <> (T.pack . show) frontUrl
-    run serverPort (app output)
+    run serverPort (app dslPath outPath)
 
 --------------------------------------------------------------------------------
 
@@ -55,11 +56,11 @@ wsUpdateInterval = 1
 --------------------------------------------------------------------------------
 
 -- | The WAI application serving the Decks backend.
-app :: HtmlOutput -> Application
-app path = simpleCors $ serve decksAPI (server path)
+app :: DecksDocument -> HtmlOutput -> Application
+app dslPath outPath = simpleCors $ serve decksAPI (server dslPath outPath)
 
-server :: HtmlOutput -> Server DecksAPI
-server (HtmlOutput path) = runWebSocket
+server :: DecksDocument -> HtmlOutput -> Server DecksAPI
+server (DecksDocument dslPath) (HtmlOutput outPath) = runWebSocket
   where
     runWebSocket :: MonadIO m => Connection -> m ()
     runWebSocket conn =
@@ -71,16 +72,16 @@ server (HtmlOutput path) = runWebSocket
     handlePushes :: Connection -> IO ()
     handlePushes conn = forever $ do
         whenM shouldUpdateFrontend $ do
-            content <- Just <$> TIO.readFile path
+            content <- Just <$> TIO.readFile outPath
             sendTextData conn (Presentation content)
         threadDelay (wsUpdateInterval * 1000000)
 
     shouldUpdateFrontend :: IO Bool
     shouldUpdateFrontend = do
-        fileExists <- doesFileExist path
+        fileExists <- doesFileExist outPath
         if fileExists
             then do
-                modTime <- getModificationTime path
+                modTime <- getModificationTime outPath
                 curTime <- getCurrentTime
                 -- Decks output was last checked now minus the update interval
                 let lastCheckedTime = addUTCTime
@@ -102,14 +103,16 @@ server (HtmlOutput path) = runWebSocket
                 logMsg LogError
                     $  "Unable to process received notification: "
                     <> T.pack err
-            Right res -> applyNotif res
+            Right res -> handleNotif res
         threadDelay (wsUpdateInterval * 1000000)
 
-    applyNotif :: Notification -> IO ()
-    applyNotif notif = do
+    handleNotif :: Notification -> IO ()
+    handleNotif notif@Notification {..} = do
         logMsg LogInfo
             $  "Got update from Decks frontend:\n"
             <> (T.pack . show) notif
-        -- TODO: Apply changes to the DSL properly
+
+        case notifType of
+            NotifTextChanged -> docEditTextRange dslPath notifSrc notifNewVal
 
 --------------------------------------------------------------------------------

@@ -28,7 +28,7 @@ main :: IO ()
 main = do
     opts <- parseCmd
     concurrently_
-        (runServer (optOutPath opts) (optFrontendUrl opts))
+        (runServer (optDslPath opts) (optOutPath opts) (optFrontendUrl opts))
         (watch opts)
 
 -- | watch @directory shouldWatch@ continuously watches for Decks files,
