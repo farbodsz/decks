@@ -11,7 +11,7 @@ slide {
   [[
   Hello
   ]]
-[[ Insert text here ]]}
+}
 
 slide {
   heading { "Another slide" }
