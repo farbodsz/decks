@@ -52,20 +52,25 @@ instance ToJSON SrcRange
 --------------------------------------------------------------------------------
 -- Actions that can be performed on a document
 
+-- | Runs a computation @f@ transforming a 'Text' input to 'Text' output, to the
+-- document with the given 'FilePath'.
+withDocument :: FilePath -> (Text -> Text) -> IO ()
+withDocument path f = do
+    contents <- TIO.readFile path
+    let newContents = f contents
+    TIO.writeFile path newContents
+
 -- | Applies 'editTextRange' to the file given by the file path.
 docEditTextRange :: FilePath -> SrcRange -> Text -> IO ()
-docEditTextRange path range newVal = do
-    content <- TIO.readFile path
-    let newContent = editTextRange content range newVal
-    TIO.writeFile path newContent
+docEditTextRange path range txt = withDocument path (editTextRange range txt)
 
 --------------------------------------------------------------------------------
 -- Helper functions
 
--- | 'editTextRange' @input range newVal@ replaces the text within the range of
+-- | 'editTextRange' @range newVal input@ replaces the text within the range of
 -- the given input to @newVal@.
-editTextRange :: Text -> SrcRange -> Text -> Text
-editTextRange input (SrcRange start end) newVal =
+editTextRange :: SrcRange -> Text -> Text -> Text
+editTextRange (SrcRange start end) newVal input =
     T.unlinesNoTrail before <> newVal <> T.unlines after
   where
     startl = unPos (sourceLine start)
