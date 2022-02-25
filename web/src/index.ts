@@ -19,7 +19,7 @@ interface DecksNotification {
   notifNewVal: string;
 }
 
-type DecksNotificationType = "NotifTextChanged";
+type DecksNotificationType = "NotifTextChanged" | "NotifTextInserted";
 
 interface DecksSrcRange {
   rangeStart: DecksSourcePos;
@@ -160,7 +160,7 @@ function editorSetupEditClicks() {
   //  - must be from the DSL, i.e. contain `data-decks-start` attribute
   //  - must be part of the slide deck, i.e. be inside `#editor-content`
   const elements: NodeListOf<HTMLElement> = container.querySelectorAll(
-    "#editor-content *[data-decks-start]"
+    "#editor-content span[data-decks-start]"
   );
 
   elements.forEach((el: HTMLElement) => {
@@ -191,12 +191,12 @@ function editorSetupEditClicks() {
   });
 }
 
-function elGetDecksRange(el: HTMLElement): DecksSrcRange | null {
+function elGetDecksRange(el: Element): DecksSrcRange | null {
   const start = el.getAttribute("data-decks-start");
   const end = el.getAttribute("data-decks-end");
 
   if (start == null || end == null) {
-    console.error("[editor] No Decks range attributes found on the element.");
+    console.error("[editor] No Decks range attributes found on this element.");
     return null;
   }
 
@@ -246,6 +246,31 @@ function editorSave() {
 }
 
 /**
+ * Inserts a textbox.
+ */
+function editorAddTextbox() {
+  // Insert onto current slide
+  const contentContainer = document.getElementById("editor-content");
+
+  if (!contentContainer) {
+    console.error("No content container found");
+    return;
+  }
+
+  const currSlide = contentContainer.querySelector("section.present");
+  if (currSlide == null) return console.log("[editor] Current slide not found");
+
+  const range = elGetDecksRange(currSlide);
+  if (range == null) return;
+
+  editorSendNotification({
+    notifType: "NotifTextInserted",
+    notifSrc: range,
+    notifNewVal: "Insert text here",
+  });
+}
+
+/**
  * Sends a Notification to the backend via the WebSocket connection
  */
 function editorSendNotification(notification: DecksNotification | null): void {
@@ -255,14 +280,15 @@ function editorSendNotification(notification: DecksNotification | null): void {
     );
   }
 
-  if (notification == null) {
+  if (notification == null || notification == undefined) {
     return console.error(
-      "[editor] Tried to send notification, but notification is null."
+      "[editor] Tried to send notification, but notification is: " +
+        notification
     );
   }
 
   console.info("[editor] Sending notification:");
-  console.info(currNotification);
+  console.info(notification);
   webSocket.send(JSON.stringify(notification));
 }
 

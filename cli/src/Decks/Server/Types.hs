@@ -59,12 +59,15 @@ data Notification = Notification
 instance FromJSON Notification
 instance ToJSON Notification
 
-data NotificationType = NotifTextChanged
+data NotificationType
+    = NotifTextChanged
+    | NotifTextInserted
     deriving (Generic, Show)
 
 instance FromJSON NotificationType where
     parseJSON = withText "NotificationType" $ \case
         "NotifTextChanged" -> pure NotifTextChanged
+        "NotifTextInserted" -> pure NotifTextInserted
         txt -> fail $ "Invalid NotificationType: " ++ T.unpack txt
 
 instance ToJSON NotificationType

@@ -64,6 +64,17 @@ withDocument path f = do
 docEditTextRange :: FilePath -> SrcRange -> Text -> IO ()
 docEditTextRange path range txt = withDocument path (editTextRange range txt)
 
+-- | Inserts text at the end of the given source range.
+docInsertText :: FilePath -> SrcRange -> Text -> IO ()
+docInsertText path SrcRange {..} txt = withDocument
+    path
+    (insertTextAt insertPos insertStr)
+  where
+    -- Insert just before the end of the parent
+    insertPos = rangeEnd { sourceColumn = addPos (-1) (sourceColumn rangeEnd) }
+    insertStr = "[[ " <> txt <> " ]]"
+    addPos x p = mkPos (unPos p + x)
+
 --------------------------------------------------------------------------------
 -- Helper functions
 
@@ -82,5 +93,13 @@ editTextRange (SrcRange start end) newVal input =
 
     before = take (startl - 1) ls ++ [T.take (startc - 1) (ls !! (startl - 1))]
     after  = T.drop (endc - 1) (ls !! (endl - 1)) : drop endl ls
+
+-- | 'insertTextAt' @input position text@ inserts some text at the specified
+-- position of the input.
+--
+-- Note that text insertion is simply a special case of text edit, with the
+-- range being edited just a single position.
+insertTextAt :: SourcePos -> Text -> Text -> Text
+insertTextAt pos = editTextRange (SrcRange pos pos)
 
 --------------------------------------------------------------------------------

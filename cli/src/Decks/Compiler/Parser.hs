@@ -54,10 +54,10 @@ pStmt = choice [pDrawStmt, pLetStmt, pDefStmt, pString, pComment]
     <* many (newline *> space)
 
 pDrawStmt :: Parser DecksStmt
-pDrawStmt = do
+pDrawStmt = do 
     start <- getSourcePos
-    el    <- pElement
-    end   <- getSourcePos
+    el <- pElement
+    end <- getSourcePos
     pure $ DecksDrawStmt (SrcRange start end) el
 
 pLetStmt :: Parser DecksStmt

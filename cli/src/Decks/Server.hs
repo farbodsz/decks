@@ -13,10 +13,7 @@ import           Control.Monad.IO.Class
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Data.Time
-import           Decks.Document                 ( DecksDocument(DecksDocument)
-                                                , HtmlOutput(HtmlOutput)
-                                                , docEditTextRange
-                                                )
+import           Decks.Document
 import           Decks.Logging
 import           Decks.Server.API
 import           Decks.Server.Types
@@ -107,8 +104,8 @@ server (DecksDocument dslPath) (HtmlOutput outPath) = runWebSocket
         threadDelay (wsUpdateInterval * 1000000)
 
     handleNotif :: Notification -> IO ()
-    handleNotif Notification {..} = do
-        case notifType of
-            NotifTextChanged -> docEditTextRange dslPath notifSrc notifNewVal
+    handleNotif Notification {..} = case notifType of
+        NotifTextChanged  -> docEditTextRange dslPath notifSrc notifNewVal
+        NotifTextInserted -> docInsertText dslPath notifSrc notifNewVal
 
 --------------------------------------------------------------------------------
