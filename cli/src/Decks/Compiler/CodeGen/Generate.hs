@@ -26,7 +26,9 @@ genStmts stmts = mapM genStmt stmts <&> T.concat
 
 -- | Generates HTML output from a Decks statement.
 genStmt :: DecksStmt -> DecksM Html
-genStmt (DecksDrawStmt l  ) = withStateT (markUsage (elIdent l)) (genElement l)
+genStmt (DecksDrawStmt src el) = withStateT (markUsage (elIdent el))
+                                            (genElement taggedEl)
+    where taggedEl = modifyPropsWith (tagElemRange src) el
 genStmt (DecksDefStmt i ct) = do
     ident <- getUniqIdent i
     withStateT (insertDef ident ct) (pure mempty)

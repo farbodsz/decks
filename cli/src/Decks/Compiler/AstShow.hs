@@ -27,7 +27,7 @@ instance AstShow Identifier where
     astShow _ (Identifier i) = ["Identifier " <> i]
 
 instance AstShow DecksStmt where
-    astShow w (DecksDrawStmt el) = treeFmt w "DrawStmt" $ astShow w el
+    astShow w (DecksDrawStmt _ el) = treeFmt w "DrawStmt" $ astShow w el
     astShow w (DecksLetStmt i el) =
         treeFmt w "LetStmt" $ astShow w i ++ astShow w el
     astShow w (DecksDefStmt i ct) =

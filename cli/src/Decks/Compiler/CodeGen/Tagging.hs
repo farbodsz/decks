@@ -13,7 +13,14 @@ import           Text.Megaparsec.Pos
 
 --------------------------------------------------------------------------------
 
--- | Adds @data-decks-start@ and @data-decks-end@ tags given a source range.
+-- | Helper function that takes a 'DecksElement', changing its props and
+-- returning the transformed element.
+modifyPropsWith
+    :: (DecksElemProps -> DecksElemProps) -> DecksElement -> DecksElement
+modifyPropsWith f el = el { elProps = f (elProps el) }
+
+-- | Adds @data-decks-start@ and @data-decks-end@ tags given a source range and
+-- existing properties.
 tagElemRange :: SrcRange -> DecksElemProps -> DecksElemProps
 tagElemRange (SrcRange start end) currProps = currProps
     { propsAttrs = [ ("data-decks-start", mkPosStr start)

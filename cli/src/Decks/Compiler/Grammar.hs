@@ -17,9 +17,7 @@ newtype DecksProgram = DecksProgram [DecksStmt]
     deriving Show
 
 data DecksStmt
-    = DecksDrawStmt
-        { drawElem :: DecksElement
-        }
+    = DecksDrawStmt SrcRange DecksElement
     | DecksLetStmt
         { letIdent :: Identifier
         , letElem  :: DecksElement
