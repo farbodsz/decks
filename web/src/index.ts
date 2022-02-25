@@ -235,17 +235,6 @@ function editorUpdateMode(editable: boolean) {
 }
 
 /**
- * Outputs the presentation HTML
- */
-function editorSave() {
-  console.error("Not implemented!");
-  // TODO:
-  // console.log("[editor] Saving content");
-  // const content = document.getElementById("editor-content")?.innerHTML;
-  // console.log(content);
-}
-
-/**
  * Inserts a textbox.
  */
 function editorAddTextbox() {
