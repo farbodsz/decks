@@ -16,7 +16,7 @@ data CodeGenError
     | EmptyContent
     | MultipleElemPropIds
     | InternalError Text
-    deriving Eq
+    deriving (Eq, Show)
 
 showCodeGenErr :: CodeGenError -> Text
 showCodeGenErr (UndefinedIdentifier i) =
