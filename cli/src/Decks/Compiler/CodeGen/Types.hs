@@ -49,8 +49,14 @@ updatePct
     -> DecksElemProps             -- ^ Props overriding the initial ones.
     -> Html                       -- ^ Content overriding the initial one.
     -> PendingContentTemplate     -- ^ Resulting 'PendingContentTemplate'.
-updatePct PendingContentTemplate {..} ps =
-    PendingContentTemplate pctTemplate (pctProps <> ps)
+updatePct PendingContentTemplate {..} ps cnt = PendingContentTemplate
+    pctTemplate
+    (pctProps <> ps)
+    (lastNonEmpty pctContent cnt)
+  where
+    lastNonEmpty "" t2 = t2
+    lastNonEmpty t1 "" = t1
+    lastNonEmpty _  t2 = t2
 
 -- | The (pending) content represented by each identifier.
 type VariableMap = M.HashMap Identifier PendingContentTemplate
