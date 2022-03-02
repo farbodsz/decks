@@ -115,7 +115,7 @@ function editorSetupConnection() {
       // Remove quotations and line breaks
       let received = event.data.trim();
       var cleanedContent = received.replace(/\\"/g, '"');
-      cleanedContent = received.substring(1, received.length - 3);
+      cleanedContent = cleanedContent.substring(1, cleanedContent.length - 3);
 
       editorSetContent(cleanedContent);
     };
@@ -201,7 +201,6 @@ function elGetDecksRange(el: Element): DecksSrcRange | null {
   }
 
   const parseColonSep = (str: string): number[] => {
-    str = str.substring(2, str.length - 2);
     const [sstart, send] = str.split(":");
     return [parseInt(sstart), parseInt(send)];
   };
