@@ -42,6 +42,7 @@ data PendingContentTemplate = PendingContentTemplate
     , pctContent  :: Html
     -- ^ Content to be applied to the template.
     }
+    deriving Show
 
 updatePct
     :: PendingContentTemplate     -- ^ Initial 'PendingContentTemplate'.
@@ -62,6 +63,7 @@ data DecksStore = DecksStore
     , stLets   :: VariableMap
     , stUsages :: UsageMap
     }
+    deriving Show
 
 initDecksStore :: DecksStore
 initDecksStore = DecksStore defaultDefs M.empty M.empty
