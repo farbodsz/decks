@@ -13,7 +13,8 @@ import           Decks.Utils                    ( fromList )
 -- | 'mkAttr' @name@ @mval@ returns the HTML code for an attribute with the
 -- given name and possible value.
 mkAttr :: Text -> Maybe Text -> Text
-mkAttr name mval = mkKeyValTxt "=" (name, mval)
+mkAttr name mval = mkKeyValTxt "=" (name, quoteValue <$> mval)
+    where quoteValue x = "\"" <> x <> "\""
 
 -- | 'mkKeyValTxt' @delimiter@ @pair@ produces a string representing the pair.
 mkKeyValTxt :: Text -> (Text, Maybe Text) -> Text

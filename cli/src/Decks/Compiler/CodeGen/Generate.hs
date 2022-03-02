@@ -104,9 +104,7 @@ fillCtProps = propsAsHtml . processProps . addDecksAttrs
     stylesToHtml ps = Right $ mkAttr "style" (Just $ genElemStylesVal ps)
 
     attrsToHtml :: [(Text, Maybe Text)] -> HtmlResult
-    attrsToHtml = Right . T.unwords . map
-        (\(k, mv) -> mkAttr k (quoted <$> mv))
-        where quoted t = "\"" <> t <> "\""
+    attrsToHtml = Right . T.unwords . map (uncurry mkAttr)
 
     addDecksAttrs :: DecksElemProps -> DecksElemProps
     addDecksAttrs = tagElemClass . tagElemStyles
