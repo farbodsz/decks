@@ -5,14 +5,29 @@
 
 !def heading = { <h3 $props$>$content$</h3> }
 
-slide {
-  heading { "My test heading" }
+!let animSlide = slide [data-auto-animate]
+!def p = { <p $props$>$content$</p> }
 
-  [[
-  Hello
-  ]]
+!let firstHead = heading { "WELCOME" }
+
+animSlide {
+  firstHead
+
+  p { 
+    [[
+    Hello, World!
+    ]]
+  }
 }
 
-slide {
-  heading { "Another slide" }
+animSlide {
+  firstHead
+
+  p [%margin-top=100px] { 
+    [[
+    Hello, World!
+    ]]
+  }
+
+  [[Some text]]
 }
