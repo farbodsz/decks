@@ -7,7 +7,9 @@ module Decks.App where
 
 import           Control.Concurrent             ( threadDelay )
 import           Control.Concurrent.Async       ( concurrently_ )
-import           Control.Monad                  ( forever )
+import           Control.Monad                  ( forever
+                                                , when
+                                                )
 import qualified Data.Text                     as T
 import           Decks.Commands
 import           Decks.Compiler                 ( compile )
@@ -68,7 +70,7 @@ processEvent
     :: FilePath -> DecksDocument -> HtmlOutput -> Bool -> Event -> IO ()
 processEvent _dirPath _dslPath outPath verbose ev@(Modified file _ _) = do
     -- TODO: check if the file that has changed is the one we're watching
-    logEvent ev
+    when verbose $ logEvent ev
     compile outPath verbose (DecksDocument file)
 processEvent _ _ _ _ _ = pure ()
 

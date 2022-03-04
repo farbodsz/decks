@@ -33,11 +33,10 @@ runCodeGen (HtmlOutput outPath) verbose p =
         Left  err           -> logMsg LogError $ showCodeGenErr err
         Right (html, store) -> do
             generateWarnings store
-
             logMsg LogSuccess "Generated HTML output successfully"
-            when verbose $ TIO.putStrLn html
-
-            logMsg LogInfo $ "Writing output to " <> T.pack outPath
+            when verbose $ do
+                TIO.putStrLn html
+                logMsg LogInfo $ "Writing output to " <> T.pack outPath
             TIO.writeFile outPath html
 
 generateWarnings :: DecksStore -> IO ()

@@ -38,12 +38,9 @@ parseDecks (DecksDocument path) verbose = do
             putStrLn (errorBundlePretty bundle)
             pure Nothing
         Right ast -> do
-            logMsg LogSuccess "Parsed successfully"
-            when verbose
-                $ TIO.putStrLn
-                . T.intercalate "\n"
-                . astShow "  "
-                $ ast
+            when verbose $ do
+                logMsg LogSuccess "Parsed successfully"
+                TIO.putStrLn . T.intercalate "\n" . astShow "  " $ ast
             pure $ Just ast
 
 pProgram :: Parser DecksProgram
