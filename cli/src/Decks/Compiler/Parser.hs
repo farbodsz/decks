@@ -6,6 +6,7 @@ module Decks.Compiler.Parser where
 
 import           Control.Monad
 import           Data.Char                      ( isSpace )
+import qualified Data.Map.Strict               as M
 import           Data.Maybe
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
@@ -103,12 +104,12 @@ pElement =
         <*> (fromMaybe [] <$> optional (braced (some pStmt)))
 
 pProps :: Parser DecksElemProps
-pProps =
-    DecksElemProps
-        <$> (optional pId <* space)
-        <*> many (pClass <* space)
-        <*> many (pStyle <* space)
-        <*> many (pAttr <* space)
+pProps = do
+    ident <- optional pId <* space
+    clss  <- many (pClass <* space)
+    stys  <- many (pStyle <* space)
+    attrs <- many (pAttr <* space)
+    pure $ DecksElemProps ident clss (M.fromList stys) (M.fromList attrs)
   where
     pId    = char '#' *> identChars
     pClass = char '.' *> identChars

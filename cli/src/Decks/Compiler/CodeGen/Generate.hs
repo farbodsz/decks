@@ -7,6 +7,7 @@ module Decks.Compiler.CodeGen.Generate where
 import           Control.Monad.Trans.Class      ( MonadTrans(lift) )
 import           Control.Monad.Trans.State
 import           Data.Functor                   ( (<&>) )
+import qualified Data.Map.Strict               as M
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import           Decks.Compiler.CodeGen.Attributes
@@ -99,12 +100,13 @@ fillCtProps = propsAsHtml . processProps . addDecksAttrs
     classesToHtml [] = Right ""
     classesToHtml cs = Right $ mkAttr "class" (Just $ genElemClassesVal cs)
 
-    stylesToHtml :: [(Text, Text)] -> HtmlResult
-    stylesToHtml [] = Right ""
-    stylesToHtml ps = Right $ mkAttr "style" (Just $ genElemStylesVal ps)
+    stylesToHtml :: M.Map Text Text -> HtmlResult
+    stylesToHtml ss = if M.null ss
+        then Right ""
+        else Right $ mkAttr "style" (Just . genElemStylesVal . M.toList $ ss)
 
-    attrsToHtml :: [(Text, Maybe Text)] -> HtmlResult
-    attrsToHtml = Right . T.unwords . map (uncurry mkAttr)
+    attrsToHtml :: M.Map Text (Maybe Text) -> HtmlResult
+    attrsToHtml = Right . T.unwords . map (uncurry mkAttr) . M.toList
 
     addDecksAttrs :: DecksElemProps -> DecksElemProps
     addDecksAttrs = tagElemClass . tagElemStyles

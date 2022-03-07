@@ -7,6 +7,7 @@ module Decks.Compiler.Grammar where
 import           Control.Applicative            ( (<|>) )
 import           Data.Hashable                  ( Hashable )
 import           Data.List                      ( union )
+import qualified Data.Map.Strict               as M
 import           Data.Text                      ( Text )
 import           Decks.Document                 ( SrcRange )
 
@@ -58,22 +59,22 @@ data DecksElement = DecksElement
 data DecksElemProps = DecksElemProps
     { propsId      :: Maybe Text              -- ^ Decks syntax: @#identifier@
     , propsClasses :: [Text]                  -- ^ Decks syntax: @.class-name@
-    , propsStyles  :: [(Text, Text)]          -- ^ Decks syntax: @%key="val"@
-    , propsAttrs   :: [(Text, Maybe Text)]    -- ^ Decks syntax: @attr="val"@
+    , propsStyles  :: M.Map Text Text         -- ^ Decks syntax: @%key="val"@
+    , propsAttrs   :: M.Map Text (Maybe Text) -- ^ Decks syntax: @attr="val"@
     }
     deriving (Eq, Show)
 
 instance Semigroup DecksElemProps where
-    p1 <> p2 = DecksElemProps (propsId p1 <|> propsId p2)
-                              (propsClasses p1 `union` propsClasses p2)
-                              (propsStyles p1 `union` propsStyles p2)
-                              (propsAttrs p1 `union` propsAttrs p2)
+    p1 <> p2 = DecksElemProps (propsId p2 <|> propsId p1)
+                              (propsClasses p2 `union` propsClasses p1)
+                              (propsStyles p2 `M.union` propsStyles p1)
+                              (propsAttrs p2 `M.union` propsAttrs p1)
 
 instance Monoid DecksElemProps where
-    mempty = DecksElemProps Nothing [] [] []
+    mempty = DecksElemProps mempty mempty mempty mempty
 
 -- | Adds the given attribute to the current props.
-addElemAttr :: (Text, Maybe Text) -> DecksElemProps -> DecksElemProps
-addElemAttr a ps = ps { propsAttrs = a : propsAttrs ps }
+addElemAttrs :: [(Text, Maybe Text)] -> DecksElemProps -> DecksElemProps
+addElemAttrs as ps = ps { propsAttrs = M.fromList as `M.union` propsAttrs ps }
 
 --------------------------------------------------------------------------------

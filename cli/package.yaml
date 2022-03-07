@@ -14,6 +14,7 @@ dependencies:
   - aeson
   - ansi-terminal
   - async
+  - containers
   - directory
   - extra
   - filepath
