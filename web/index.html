@@ -8,13 +8,14 @@
 
   <body>
     <!-- Editor view -->
-    <div class="editor">
+    <div id="editor-ctrls" class="editor">
+      <button onclick="editorPresent();">Present</button>
       <button onclick="editorAddTextbox();">Add Textbox</button>
       <span id="status-mode" class="mode-text">Preview mode</span>
     </div>
 
     <!-- Presentation content -->
-    <div class="reveal">
+    <div id="reveal-container" class="reveal">
       <div id="editor-content" class="slides">
         <section>Click Load to load content from Decks</section>
       </div>
@@ -22,6 +23,7 @@
 
     <!-- Reveal -->
     <script src="node_modules/reveal.js/dist/reveal.js"></script>
+    <script src="node_modules/reveal.js/plugin/markdown/markdown.js"></script>
 
     <!-- Editor script -->
     <script src="dist/index.js"></script>

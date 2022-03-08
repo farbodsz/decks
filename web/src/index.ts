@@ -80,6 +80,9 @@ function revealInit() {
     // See https://github.com/DefinitelyTyped/DefinitelyTyped/pull/57863
     // @ts-ignore
     disableLayout: true,
+
+    // Enable markdown support
+    plugins: [RevealMarkdown],
   });
   console.info("[reveal] Reveal initialized");
 }
@@ -231,6 +234,17 @@ function editorUpdateMode(editable: boolean) {
   editorEditable = editable;
   const statusTxt = document.getElementById("status-mode")!;
   statusTxt.textContent = editable ? "Editing mode" : "Previewing mode";
+}
+
+/**
+ * Hides the editor elements, so that only the slides are visible.
+ */
+function editorPresent() {
+  const editorCtrls = document.getElementById("editor-ctrls")!;
+  editorCtrls.style.display = "none";
+
+  const revealContent = document.getElementById("reveal-container")!;
+  revealContent.style.height = "100%";
 }
 
 /**
